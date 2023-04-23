@@ -23,7 +23,7 @@ const startAPI = (self) => {
     api.get('/node', (req, res) => filter(self, req, res, nodeController.get))
     api.post('/node', (req, res) => filter(self, req, res, nodeController.post))
     api.delete('/node', (req, res) => filter(self, req, res, nodeController.remove))
-    api.listen(self.apiport, () => console.log(`API is running at ${self.host}:${self.apiport}`))
+    api.listen(self.apiport, () => console.log(`API is running on port ${self.apiport}`))
 }
 
 module.exports = startAPI

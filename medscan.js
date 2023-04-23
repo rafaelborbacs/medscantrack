@@ -3,12 +3,12 @@ const startAPI = require('./api.js')
 const spawnSCP = require('./scp.js')
 const startSync = require('./sync.js')
 
-const [, , aetitle, host, scpport, scpfolder, dbfolder, apiport] = process.argv
+const [, , aetitle, scpport, scpfolder, dbfolder, apiport] = process.argv
 
-const self = { aetitle, host, scpport, scpfolder, dbfolder, apiport }
+const self = { aetitle, scpport, scpfolder, dbfolder, apiport }
 
-if(!aetitle || !host || !scpport || !scpfolder || !dbfolder || !apiport){
-    console.log("usage: medscan [aetitle] [host] [scpport] [scpfolder] [dbfolder] [apiport]")
+if(!aetitle|| !scpport || !scpfolder || !dbfolder || !apiport){
+    console.log("usage: medscan [aetitle] [scpport] [scpfolder] [dbfolder] [apiport]")
     process.exit(1)
 }
 
