@@ -1,4 +1,5 @@
 node_modules/
 dcm4chee/
 teste.js
+dump.js
 .env

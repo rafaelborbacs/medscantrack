@@ -4,6 +4,7 @@ const getSCPFiles = require('./files.js')
 const db = require('./db.js')
 
 const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
+const shuffle = (arr) => arr.sort(() => Math.random() - 0.5)
 
 const timeFormat = (time) => {
     const hours = Math.floor(time / (60 * 60 * 1000))
@@ -14,57 +15,64 @@ const timeFormat = (time) => {
         + `${seconds.toFixed(2)}s`
 }
 
-const startSync = async (self) => {
+const startSync = async () => {
+    let idle = true
     while(true){
-        await sleep(10000)
+        if(idle)
+            await sleep(10000)
+        idle = true
         const nodes = await db.find('node', {})
         if(nodes && nodes.length > 0){
-            const localFiles = await getSCPFiles(self)
+            const localFiles = getSCPFiles()
             if(localFiles && localFiles.length > 0){
                 for(const node of nodes){
-                    const remoteFiles = await checkSCP(self, node)
-                    if(remoteFiles && remoteFiles.length > 0){
-                        const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
+                    const remoteFiles = await checkSCP(node)
+                    if(remoteFiles){
+                        const missingFiles = shuffle(localFiles.filter(file => !remoteFiles.includes(file))).slice(0, 500)
                         if(missingFiles && missingFiles.length > 0){
-                            await mkdirNode(self, node)
-                            for(const file of missingFiles){
-                                await cpFileNode(self, node, file)
-                            }
-                            await storeSCUNode(self, node)
-                            await clearDirNode(self, node)
+                            await mkdirNode(node)
+                            for(const file of missingFiles)
+                                await cpFileNode(node, file)
+                            await storeSCUNode(node, missingFiles.length)
+                            await clearDirNode(node)
+                            idle = false
                         }
-                    }      
+                    }
                 }
             }
         }
     }
 }
 
-const checkSCP = async (self, node) => new Promise((resolve, reject) => {
+const checkSCP = async (node) => new Promise((resolve, reject) => {
     request({
         url: `http://${node.host}:${node.apiport}/scpfiles`,
-        headers: { "Authorization": `Bearer ${self.aetitle}` }
+        timeout: 10000,
+        headers: { "Authorization": `Bearer ${process.self.aetitle}` }
     }, (error, response, body) => {
         if(error) resolve(false)
-        else resolve(body)
+        else if (typeof body === 'string')
+            try { resolve(JSON.parse(body)) }
+            catch (e) { resolve(false) }
+        resolve(body)
     })
 })
 
-const cpFileNode = async (self, node, file) => new Promise((resolve, reject) => {
-    const cp = `cp -n ${self.scpfolder}/${file} ${self.scpfolder}/${node.host}_${node.scpport}`
+const cpFileNode = async (node, file) => new Promise((resolve, reject) => {
+    const cp = `cp -f ${process.self.scpfolder}/${file} ${process.self.scpfolder}/${node.host}_${node.scpport}`
     exec(cp, (err, stdout, stderr) => {
         if (err){
-            console.error(err)
-            resolve(false)
+            console.error(`Error on copying ${file}`)
+            reject()
         }
-        resolve(true)
+        resolve()
     })
 })
 
-const storeSCUNode = async (self, node) => new Promise((resolve, reject) => {
-    const source = `${self.scpfolder}/${node.host}_${node.scpport}`
-    const destination = `${self.aetitle}@${node.host}:${node.scpport}`
-    console.log(`SCU ${source} --> ${destination}`)
+const storeSCUNode = async (node, filesCount) => new Promise((resolve, reject) => {
+    const source = `${process.self.scpfolder}/${node.host}_${node.scpport}`
+    const destination = `${process.self.aetitle}@${node.host}:${node.scpport}`
+    console.log(`SCU ${source} --> ${destination} [${filesCount} files]`)
     const start = new Date()
     exec(`./dcm4chee/bin/storescu -c ${destination} ${source}`, (err, stdout, stderr) => {
         if (err){
@@ -73,26 +81,26 @@ const storeSCUNode = async (self, node) => new Promise((resolve, reject) => {
         }
         const elapsed = new Date() - start
         console.log(`done in ${timeFormat(new Date(elapsed))}`)
-        resolve(true)
+        resolve()
     })
 })
 
-const mkdirNode = async (self, node) => new Promise((resolve, reject) => {
-    const folder = `${self.scpfolder}/${node.host}_${node.scpport}`
+const mkdirNode = async (node) => new Promise((resolve, reject) => {
+    const folder = `${process.self.scpfolder}/${node.host}_${node.scpport}`
     exec(`mkdir -p ${folder}`, (err, stdout, stderr) => {
         if (err){
-            console.error(`mkdir error --> ${folder}`)
+            console.error(`Error on mkdir ${folder}`)
             reject()
         }
         resolve()
     })
 })
 
-const clearDirNode = async (self, node) => new Promise((resolve, reject) => {
-    const folder = `${self.scpfolder}/${node.host}_${node.scpport}`
+const clearDirNode = async (node) => new Promise((resolve, reject) => {
+    const folder = `${process.self.scpfolder}/${node.host}_${node.scpport}`
     exec(`rm -fr ${folder}/*`, (err, stdout, stderr) => {
         if (err){
-            console.error(`clearDir error --> ${folder}`)
+            console.error(`Error on clearDir ${folder}`)
             reject()
         }
         resolve()

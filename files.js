@@ -1,18 +1,14 @@
 const fs = require('fs')
 const path = require('path')
 
-const shuffle = (arr) => arr.sort(() => Math.random() - 0.5)
-
-const getSCPFiles = async (self) => {
-    return shuffle(
-        fs.readdirSync(self.scpfolder).filter(file => {
-            const filePath = path.join(self.scpfolder, file)
-            return !file.endsWith(".part")
-                && !file.startsWith(".")
-                && fs.existsSync(filePath)
-                && fs.statSync(filePath).isFile()
-        })
-    )
+const getSCPFiles = (checkUse) => {
+    return fs.readdirSync(process.self.scpfolder).filter(file => {
+        const filePath = path.join(process.self.scpfolder, file)
+        if(file.endsWith(".part") || file.endsWith(".tmp") || file.startsWith(".") || !fs.existsSync(filePath))
+            return false
+        const stats = fs.statSync(filePath)
+        return stats && stats.isFile() && (!checkUse || (Date.now() - stats.atimeMs) > 2000) 
+    })
 }
 
 module.exports = getSCPFiles

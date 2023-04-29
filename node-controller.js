@@ -2,7 +2,7 @@ const Joi = require('joi-oid')
 const db = require('./db.js')
 
 const schemaPost = Joi.object({
-    host: Joi.string().min(8).max(32).required(),
+    host: Joi.string().min(8).max(64).required(),
     scpport: Joi.number().min(1).max(99999).required(),
     apiport: Joi.number().min(1).max(99999).required(),
     name: Joi.string().min(1).max(60).required()
@@ -13,13 +13,12 @@ const schemaRemove = Joi.object({
     scpport: Joi.number().min(1).max(99999).required()
 })
 
-const get = async (self, req, res) => {
-    const query = {}
-    const data = await db.find('node', query)
+const get = async (req, res) => {
+    const data = await db.find('node', {})
     return res.json(data)
 }
 
-const post = async (self, req, res) => {
+const post = async (req, res) => {
     const node = {
         host: req.body.host,
         scpport: req.body.scpport,
@@ -29,11 +28,17 @@ const post = async (self, req, res) => {
     const validation = schemaPost.validate(node)
     if(validation.error)
         return res.status(400).send({validation, msg:'error'})
+    let data = await db.find('node', { host: node.host, scpport: node.scpport })
+    if(data && data.length > 0)
+        return res.status(409).send({node, msg:'duplicate entry host:scpport'})
+    data = await db.find('node', { host: node.host, apiport: node.apiport })
+    if(data && data.length > 0)
+        return res.status(409).send({node, msg:'duplicate entry host:apiport'})
     const rs = await db.insert('node', node)
-    return res.json({node, rs, msg:'ok'})
+    return res.json({rs, msg:'ok'})
 }
 
-const remove = async (self, req, res) => {
+const remove = async (req, res) => {
     const node = {
         host: req.body.host,
         scpport: req.body.scpport
@@ -42,7 +47,7 @@ const remove = async (self, req, res) => {
     if(validation.error)
         return res.status(400).send({validation, msg:'error'})
     const rs = await db.remove('node', node)
-    return res.json({node, rs, msg:'ok'})
+    return res.json({rs, msg:'ok'})
 }
 
 module.exports = { get, post, remove }

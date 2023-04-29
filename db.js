@@ -2,8 +2,9 @@ const Db = require('tingodb')().Db
 
 let db = null
 
-const startDB = async (self) => {
-    db = new Db(self.dbfolder, {})
+const startDB = async () => {
+    db = new Db(process.self.dbfolder, {})
+    db.collection('file').ensureIndex({name: 1}, (err, indexName) => console.log(`Index created: ${indexName}`))
     console.log(`DB is running embedded`)
 }
 
@@ -16,9 +17,9 @@ const insert = async (collection, obj) => {
     })
 }
 
-const find = async (collection, query) => {
+const find = async (collection, query, projection) => {
     return new Promise((resolve, reject) => {
-        db.collection(collection).find(query).toArray((error, results) => {
+        db.collection(collection).find(query, projection).toArray((error, results) => {
             if(error) reject(error)
             else resolve(results)
         })

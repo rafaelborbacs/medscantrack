@@ -1,20 +1,34 @@
+require('dotenv').config()
 const { startDB } = require('./db.js')
 const startAPI = require('./api.js')
 const spawnSCP = require('./scp.js')
 const startSync = require('./sync.js')
+const startInspect = require('./inspect.js')
 
 const [, , aetitle, scpport, scpfolder, dbfolder, apiport] = process.argv
 
-const self = { aetitle, scpport, scpfolder, dbfolder, apiport }
+let self = { aetitle, scpport, scpfolder, scpfolder, dbfolder, apiport }
 
-if(!aetitle|| !scpport || !scpfolder || !dbfolder || !apiport){
+if(!aetitle || !scpport || !scpfolder || !dbfolder || !apiport)
+    self = {
+        aetitle: process.env.aetitle,
+        scpport: process.env.scpport,
+        scpfolder: process.env.scpfolder,
+        dbfolder: process.env.dbfolder,
+        apiport: process.env.apiport
+    }
+
+if(!self.aetitle || !self.scpport || !self.scpfolder || !self.dbfolder || !self.apiport){
     console.log("usage: medscan [aetitle] [scpport] [scpfolder] [dbfolder] [apiport]")
     process.exit(1)
 }
 
-console.log(self)
+process.self = self
 
-startDB(self)
-startAPI(self)
-spawnSCP(self)
-startSync(self)
+console.log(process.self)
+
+startDB()
+startAPI()
+spawnSCP()
+startSync()
+startInspect()
