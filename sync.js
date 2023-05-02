@@ -16,26 +16,26 @@ const timeFormat = (time) => {
 }
 
 const startSync = async () => {
+    process.self.nodes = await db.find('node', {})
     let idle = true
     while(true){
         if(idle)
             await sleep(10000)
         idle = true
-        const nodes = await db.find('node', {})
-        if(nodes && nodes.length > 0){
+        if(nodes.length > 0){
             const localFiles = getSCPFiles()
-            if(localFiles && localFiles.length > 0){
-                for(const node of nodes){
+            if(localFiles.length > 0){
+                for(const node of process.self.nodes){
                     const remoteFiles = await checkSCP(node)
                     if(remoteFiles){
                         const missingFiles = shuffle(localFiles.filter(file => !remoteFiles.includes(file))).slice(0, 500)
-                        if(missingFiles && missingFiles.length > 0){
+                        if(missingFiles.length > 0){
+                            idle = false
                             await mkdirNode(node)
                             for(const file of missingFiles)
                                 await cpFileNode(node, file)
                             await storeSCUNode(node, missingFiles.length)
                             await clearDirNode(node)
-                            idle = false
                         }
                     }
                 }
@@ -47,7 +47,7 @@ const startSync = async () => {
 const checkSCP = async (node) => new Promise((resolve, reject) => {
     request({
         url: `http://${node.host}:${node.apiport}/scpfiles`,
-        timeout: 10000,
+        timeout: 5000,
         headers: { "Authorization": `Bearer ${process.self.aetitle}` }
     }, (error, response, body) => {
         if(error) resolve(false)

@@ -44,6 +44,7 @@ const startInspect = async (req, res) => {
             const dbFiles = await db.find('file', {name: {$in: files}}, {name: 1, _id: 0})
             const nonDbFiles = files.filter(file => dbFiles.find(dbFile => dbFile.name === file) === undefined)
             if(nonDbFiles && nonDbFiles.length > 0){
+                idle = false
                 console.log(`Getting metadata [${nonDbFiles.length} new files]`)
                 for(const file of nonDbFiles){
                     const metadicom = await getMetadicom(file)
@@ -53,7 +54,6 @@ const startInspect = async (req, res) => {
                         console.error(`File ${file} corrupted. Erasing it`)
                         await deleteFile(file)
                     }
-                    idle = false
                 }
             }
         }

@@ -14,8 +14,8 @@ const schemaRemove = Joi.object({
 })
 
 const get = async (req, res) => {
-    const data = await db.find('node', {})
-    return res.json(data)
+    process.self.nodes = await db.find('node', {})
+    return res.json(process.self.nodes)
 }
 
 const post = async (req, res) => {
@@ -35,6 +35,7 @@ const post = async (req, res) => {
     if(data && data.length > 0)
         return res.status(409).send({node, msg:'duplicate entry host:apiport'})
     const rs = await db.insert('node', node)
+    process.self.nodes = await db.find('node', {})
     return res.json({rs, msg:'ok'})
 }
 
@@ -47,6 +48,7 @@ const remove = async (req, res) => {
     if(validation.error)
         return res.status(400).send({validation, msg:'error'})
     const rs = await db.remove('node', node)
+    process.self.nodes = await db.find('node', {})
     return res.json({rs, msg:'ok'})
 }
 
