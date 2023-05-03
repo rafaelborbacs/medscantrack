@@ -4,7 +4,6 @@ const getSCPFiles = require('./files.js')
 const db = require('./db.js')
 
 const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
-const shuffle = (arr) => arr.sort(() => Math.random() - 0.5)
 
 const timeFormat = (time) => {
     const hours = Math.floor(time / (60 * 60 * 1000))
@@ -22,13 +21,13 @@ const startSync = async () => {
         if(idle)
             await sleep(10000)
         idle = true
-        if(nodes.length > 0){
+        if(process.self.nodes.length > 0){
             const localFiles = getSCPFiles()
             if(localFiles.length > 0){
                 for(const node of process.self.nodes){
                     const remoteFiles = await checkSCP(node)
                     if(remoteFiles){
-                        const missingFiles = shuffle(localFiles.filter(file => !remoteFiles.includes(file))).slice(0, 500)
+                        const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
                         if(missingFiles.length > 0){
                             idle = false
                             await mkdirNode(node)
