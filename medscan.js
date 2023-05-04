@@ -1,6 +1,5 @@
 require('dotenv').config()
 const { startDB } = require('./db.js')
-const cleanup = require('./cleanup.js')
 const startAPI = require('./api.js')
 const spawnSCP = require('./scp.js')
 const startSync = require('./sync.js')
@@ -28,7 +27,6 @@ process.self = self
 
 console.log(process.self)
 
-cleanup()
 startDB()
 startAPI()
 spawnSCP()

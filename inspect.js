@@ -1,6 +1,8 @@
 const { exec } = require('child_process')
-const chokidar = require('chokidar')
+const getSCPFiles = require('./files.js')
 const db = require('./db.js')
+
+const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
 
 const deleteFile = async (file) => new Promise((resolve, reject) => {
     exec(`rm -f ${process.self.scpfolder}/${file}`, (err, stdout, stderr) => resolve())
@@ -31,32 +33,31 @@ const getMetadicom = async (file) => new Promise((resolve, reject) => {
     })
 })
 
-const inspect = async (file) => {
-    const dbFiles = await db.find('file', {name: file}, {name: 1, _id: 0})
-    if(dbFiles.length === 0){
-        console.log(`New file: ${file}`)
-        const metadicom = await getMetadicom(file)
-        if(metadicom)
-            await db.insert('file', {name: file, created: Date.now(), metadicom})
-        else {
-            console.error(`Erasing corrupted file: ${file}`)
-            await deleteFile(file)
+const startInspect = async (req, res) => {
+    let idle = true
+    while(true){
+        if(idle)
+            await sleep(27000)
+        idle = true
+        const files = getSCPFiles(true)
+        if(files && files.length > 0){
+            const dbFiles = await db.find('file', {name: {$in: files}}, {name: 1, _id: 0})
+            const nonDbFiles = files.filter(file => dbFiles.find(dbFile => dbFile.name === file) === undefined)
+            if(nonDbFiles && nonDbFiles.length > 0){
+                idle = false
+                console.log(`Getting metadata [${nonDbFiles.length} new files]`)
+                for(const file of nonDbFiles){
+                    const metadicom = await getMetadicom(file)
+                    if(metadicom)
+                        await db.insert('file', { name: file, created: Date.now(), metadicom })
+                    else {
+                        console.error(`File ${file} corrupted. Erasing it`)
+                        await deleteFile(file)
+                    }
+                }
+            }
         }
     }
-}
-
-const startInspect = async () => {
-    const watcher = chokidar.watch(process.self.scpfolder, {
-        ignored: [
-            /[\/\\]\./, // dotfiles
-            /\.tmp$/, // temp
-            /(^|[/\\])\../, // starting with a dot
-            /\/$/, // dir
-        ],
-        persistent: true
-    })
-    watcher.on('add', (filePath) => inspect(filePath.split('/').pop()))
-    watcher.on('error', (err) => console.error('Error watching directory'))
 }
 
 module.exports = startInspect

@@ -10,7 +10,7 @@ const get = async (req, res) => {
     if(req.query.name)
         query.name = req.query.name
     let projection = undefined
-    if(req.query.names)
+    if(req.query.files)
         projection = {name: 1, _id: 0}
     const data = await db.find('file', query, projection)
     return res.json(data)
