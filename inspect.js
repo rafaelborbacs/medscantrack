@@ -1,11 +1,12 @@
+const fs = require('fs')
 const { exec } = require('child_process')
 const getSCPFiles = require('./files.js')
 const db = require('./db.js')
 
 const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
 
-const deleteFile = async (file) => new Promise((resolve, reject) => {
-    exec(`rm -f ${process.self.scpfolder}/${file}`, (err, stdout, stderr) => resolve())
+const deleteFile = async (file) => fs.unlink(`${process.self.scpfolder}/${file}`, err => {
+    if (err) console.error(`Error on deleting ${file}`)
 })
 
 const getMetadicom = async (file) => new Promise((resolve, reject) => {
@@ -33,7 +34,7 @@ const getMetadicom = async (file) => new Promise((resolve, reject) => {
     })
 })
 
-const startInspect = async (req, res) => {
+const startInspect = async () => {
     let idle = true
     while(true){
         if(idle)
@@ -45,7 +46,7 @@ const startInspect = async (req, res) => {
             const nonDbFiles = files.filter(file => dbFiles.find(dbFile => dbFile.name === file) === undefined)
             if(nonDbFiles.length > 0){
                 idle = false
-                console.log(`Getting metadata [${nonDbFiles.length} new files]`)
+                console.log(`Metadata [${nonDbFiles.length} new files]`)
                 for(const file of nonDbFiles){
                     const metadicom = await getMetadicom(file)
                     if(metadicom){
@@ -54,7 +55,7 @@ const startInspect = async (req, res) => {
                         } catch (err) {}
                     }
                     else {
-                        console.error(`Erasing corrupted file: ${file}`)
+                        console.error(`Deleting corrupted file: ${file}`)
                         await deleteFile(file)
                     }
                 }

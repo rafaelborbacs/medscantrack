@@ -1,4 +1,3 @@
-const { exec } = require('child_process')
 const Joi = require('joi-oid')
 const db = require('./db.js')
 
@@ -55,19 +54,6 @@ const remove = async (req, res) => {
 
 const updateNodes = async () => {
     process.self.nodes = await db.find('node', {})
-    for(const node of process.self.nodes)
-        await mkdirNode(node)
 }
-
-const mkdirNode = async (node) => new Promise((resolve, reject) => {
-    const folder = `${process.self.scpfolder}/${node.host}_${node.scpport}`
-    exec(`mkdir -p ${folder}`, (err, stdout, stderr) => {
-        if (err){
-            console.error(`Error on mkdir ${folder}`)
-            reject()
-        }
-        resolve()
-    })
-})
 
 module.exports = { get, post, remove, updateNodes }
