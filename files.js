@@ -7,7 +7,7 @@ const getSCPFiles = (checkUse) => {
         if(file.endsWith(".part") || file.endsWith(".tmp") || file.startsWith(".") || !fs.existsSync(filePath))
             return false
         const stats = fs.statSync(filePath)
-        return stats && stats.isFile() && (!checkUse || (Date.now() - stats.atimeMs) > 2000) 
+        return stats && stats.isFile() && (!checkUse || (Date.now() - stats.atimeMs) > 2000)
     })
 }
 

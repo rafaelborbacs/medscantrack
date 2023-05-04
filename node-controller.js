@@ -1,3 +1,4 @@
+const { exec } = require('child_process')
 const Joi = require('joi-oid')
 const db = require('./db.js')
 
@@ -14,7 +15,7 @@ const schemaRemove = Joi.object({
 })
 
 const get = async (req, res) => {
-    process.self.nodes = await db.find('node', {})
+    await updateNodes()
     return res.json(process.self.nodes)
 }
 
@@ -35,7 +36,7 @@ const post = async (req, res) => {
     if(data && data.length > 0)
         return res.status(409).send({node, msg:'duplicate entry host:apiport'})
     const rs = await db.insert('node', node)
-    process.self.nodes = await db.find('node', {})
+    updateNodes()
     return res.json({rs, msg:'ok'})
 }
 
@@ -48,8 +49,25 @@ const remove = async (req, res) => {
     if(validation.error)
         return res.status(400).send({validation, msg:'error'})
     const rs = await db.remove('node', node)
-    process.self.nodes = await db.find('node', {})
+    updateNodes()
     return res.json({rs, msg:'ok'})
 }
 
-module.exports = { get, post, remove }
+const updateNodes = async () => {
+    process.self.nodes = await db.find('node', {})
+    for(const node of process.self.nodes)
+        await mkdirNode(node)
+}
+
+const mkdirNode = async (node) => new Promise((resolve, reject) => {
+    const folder = `${process.self.scpfolder}/${node.host}_${node.scpport}`
+    exec(`mkdir -p ${folder}`, (err, stdout, stderr) => {
+        if (err){
+            console.error(`Error on mkdir ${folder}`)
+            reject()
+        }
+        resolve()
+    })
+})
+
+module.exports = { get, post, remove, updateNodes }

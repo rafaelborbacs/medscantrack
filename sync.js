@@ -1,10 +1,9 @@
 const request = require('request')
 const { exec } = require('child_process')
 const getSCPFiles = require('./files.js')
-const db = require('./db.js')
+const { updateNodes } = require('./node-controller.js')
 
 const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
-const shuffle = (arr) => arr.sort(() => Math.random() - 0.5)
 
 const timeFormat = (time) => {
     const hours = Math.floor(time / (60 * 60 * 1000))
@@ -16,22 +15,21 @@ const timeFormat = (time) => {
 }
 
 const startSync = async () => {
-    process.self.nodes = await db.find('node', {})
+    await updateNodes()
     let idle = true
     while(true){
         if(idle)
             await sleep(10000)
         idle = true
-        if(nodes.length > 0){
+        if(process.self.nodes.length > 0){
             const localFiles = getSCPFiles()
             if(localFiles.length > 0){
                 for(const node of process.self.nodes){
                     const remoteFiles = await checkSCP(node)
                     if(remoteFiles){
-                        const missingFiles = shuffle(localFiles.filter(file => !remoteFiles.includes(file))).slice(0, 500)
+                        const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
                         if(missingFiles.length > 0){
                             idle = false
-                            await mkdirNode(node)
                             for(const file of missingFiles)
                                 await cpFileNode(node, file)
                             await storeSCUNode(node, missingFiles.length)
@@ -47,7 +45,7 @@ const startSync = async () => {
 const checkSCP = async (node) => new Promise((resolve, reject) => {
     request({
         url: `http://${node.host}:${node.apiport}/scpfiles`,
-        timeout: 5000,
+        timeout: 10000,
         headers: { "Authorization": `Bearer ${process.self.aetitle}` }
     }, (error, response, body) => {
         if(error) resolve(false)
@@ -81,17 +79,6 @@ const storeSCUNode = async (node, filesCount) => new Promise((resolve, reject) =
         }
         const elapsed = new Date() - start
         console.log(`done in ${timeFormat(new Date(elapsed))}`)
-        resolve()
-    })
-})
-
-const mkdirNode = async (node) => new Promise((resolve, reject) => {
-    const folder = `${process.self.scpfolder}/${node.host}_${node.scpport}`
-    exec(`mkdir -p ${folder}`, (err, stdout, stderr) => {
-        if (err){
-            console.error(`Error on mkdir ${folder}`)
-            reject()
-        }
         resolve()
     })
 })

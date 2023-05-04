@@ -4,7 +4,7 @@ let db = null
 
 const startDB = async () => {
     db = new Db(process.self.dbfolder, {})
-    db.collection('file').ensureIndex({name: 1}, (err, indexName) => console.log(`Index created: ${indexName}`))
+    db.collection('file').ensureIndex({name: 1}, {unique: true}, (err, indexName) => console.log(`Index created: ${indexName}`))
     console.log(`DB is running embedded`)
 }
 

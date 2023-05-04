@@ -40,18 +40,21 @@ const startInspect = async (req, res) => {
             await sleep(27000)
         idle = true
         const files = getSCPFiles(true)
-        if(files && files.length > 0){
+        if(files.length > 0){
             const dbFiles = await db.find('file', {name: {$in: files}}, {name: 1, _id: 0})
             const nonDbFiles = files.filter(file => dbFiles.find(dbFile => dbFile.name === file) === undefined)
-            if(nonDbFiles && nonDbFiles.length > 0){
+            if(nonDbFiles.length > 0){
                 idle = false
                 console.log(`Getting metadata [${nonDbFiles.length} new files]`)
                 for(const file of nonDbFiles){
                     const metadicom = await getMetadicom(file)
-                    if(metadicom)
-                        await db.insert('file', { name: file, created: Date.now(), metadicom })
+                    if(metadicom){
+                        try {
+                            await db.insert('file', { name: file, created: Date.now(), metadicom })
+                        } catch (err) {}
+                    }
                     else {
-                        console.error(`File ${file} corrupted. Erasing it`)
+                        console.error(`Erasing corrupted file: ${file}`)
                         await deleteFile(file)
                     }
                 }
