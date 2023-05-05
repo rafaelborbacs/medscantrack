@@ -1,7 +1,8 @@
+const fs = require('fs')
+const path = require('path')
 const request = require('request')
-const { exec } = require('child_process')
+const { exec, spawn } = require('child_process')
 const getSCPFiles = require('./files.js')
-const { updateNodes } = require('./node-controller.js')
 
 const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
 
@@ -21,12 +22,13 @@ const sync = async () => {
         for(const node of process.self.nodes){
             const remoteFiles = await checkSCP(node)
             if(remoteFiles){
-                const missingFiles = localFiles.filter(file => !remoteFiles.includes(file)).slice(0, 1000)
+                const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
                 if(missingFiles.length > 0){
                     idle = false
-                    //for(const file of missingFiles)
-                    //    await cpFileNode(node, file)
-                    await storeSCUNode(node, missingFiles)
+                    for(const file of missingFiles)
+                        await copyFile(node, file)
+                    await storeSCUNode(node, missingFiles.length)
+                    await clearDirNode(node)
                 }
             }
         }
@@ -35,7 +37,6 @@ const sync = async () => {
 }
 
 const startSync = async () => {
-    await updateNodes()
     let idle = true
     while(true){
         if(idle)
@@ -58,20 +59,54 @@ const checkSCP = async (node) => new Promise((resolve, reject) => {
     })
 })
 
-const storeSCUNode = async (node, files) => new Promise((resolve, reject) => {
-    const source = files.map(file => `${process.self.scpfolder}/${file}`).join(" ")
-    const destination = `${process.self.aetitle}@${node.host}:${node.scpport}`
-    console.log(`SCU -c ${destination} [${files.length} files]`)
-    const start = new Date()
-    exec(`./dcm4chee/bin/storescu -c ${destination} ${source}`, (err, stdout, stderr) => {
+const copyFile = async (node, file) => new Promise((resolve, reject) => {
+    const source = path.join(process.self.scpfolder, file)
+    const destination = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`, file)
+    fs.copyFile(source, destination, err => {
         if (err){
-            console.error('SCU error')
-            resolve(false)
+            console.error(`Error on copying ${file}`)
+            reject()
         }
+        else resolve()
+    })
+})
+
+const storescu = path.join('.', 'dcm4chee', 'bin', 'storescu')
+const storeSCUNode = async (node, filesCount) => new Promise((resolve, reject) => {
+    const start = new Date()
+    const source = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`)
+    const destination = `${process.self.aetitle}@${node.host}:${node.scpport}`
+    console.log(`SCU ${source} --> ${destination} [${filesCount} files]`)
+    const scu = spawn(storescu, ['-c', destination, source], {shell:true})
+    scu.stdout.on('data', () => {})
+    scu.stderr.on('data', () => {})
+    scu.on('close', code => {
         const elapsed = new Date() - start
         console.log(`done in ${timeFormat(new Date(elapsed))}`)
         resolve()
     })
+    scu.on('error', code => {
+        console.error(`SCU error: ${code}`)
+        const elapsed = new Date() - start
+        console.log(`done in ${timeFormat(new Date(elapsed))}`)
+        resolve()
+    })
+})
+
+const clearDirNode = async (node) => new Promise((resolve, reject) => {
+    const folder = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`)
+    if (process.platform === 'win32') {
+        exec(`del /S /Q ${folder}\\*`, (err, stdout, stderr) => {
+            if (err) console.error(`Error clearing folder: ${folder}`);
+            resolve()
+        })
+    }
+    else {
+        exec(`rm -fr ${folder}/*`, (err, stdout, stderr) => {
+            if (err) console.error(`Error clearing folder: ${folder}`);
+            resolve()
+        })
+    }
 })
 
 module.exports = startSync

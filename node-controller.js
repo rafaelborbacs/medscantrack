@@ -1,3 +1,5 @@
+const fs = require('fs')
+const path = require('path')
 const Joi = require('joi-oid')
 const db = require('./db.js')
 
@@ -54,6 +56,19 @@ const remove = async (req, res) => {
 
 const updateNodes = async () => {
     process.self.nodes = await db.find('node', {})
+    for(const node of process.self.nodes)
+        await mkdirNode(node)
 }
+
+const mkdirNode = async (node) => new Promise((resolve, reject) => {
+    const folder = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`)
+    fs.mkdir(folder, {recursive: true}, err => {
+        if (err){
+            console.error(`Error on mkdir ${folder}`)
+            reject()
+        }
+        else resolve()
+    })
+})
 
 module.exports = { get, post, remove, updateNodes }

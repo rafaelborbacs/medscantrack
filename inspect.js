@@ -5,10 +5,6 @@ const db = require('./db.js')
 
 const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
 
-const deleteFile = async (file) => fs.unlink(`${process.self.scpfolder}/${file}`, err => {
-    if (err) console.error(`Error on deleting ${file}`)
-})
-
 const getMetadicom = async (file) => new Promise((resolve, reject) => {
     exec(`dcmdump +P "0008,0016" +P "0008,0018" +P "0010,0020" +P "0008,0060" +P "0008,0020" ${process.self.scpfolder}/${file}`, (err, stdout, stderr) => {
         if (!err){
@@ -56,7 +52,7 @@ const startInspect = async () => {
                     }
                     else {
                         console.error(`Deleting corrupted file: ${file}`)
-                        await deleteFile(file)
+                        fs.unlinkSync(`${process.self.scpfolder}/${file}`)
                     }
                 }
             }

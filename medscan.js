@@ -1,10 +1,10 @@
 require('dotenv').config()
-const cleanup = require('./cleanup.js')
 const { startDB } = require('./db.js')
 const startAPI = require('./api.js')
 const spawnSCP = require('./scp.js')
 const startSync = require('./sync.js')
 const startInspect = require('./inspect.js')
+const { updateNodes } = require('./node-controller.js')
 
 const [, , aetitle, scpport, scpfolder, dbfolder, apiport] = process.argv
 
@@ -27,13 +27,9 @@ if(!self.aetitle || !self.scpport || !self.scpfolder || !self.dbfolder || !self.
 process.self = self
 console.log(process.self)
 
-const start = async () => {
-    await cleanup()
-    startDB()
-    startAPI()
-    spawnSCP()
-    startSync()
-    startInspect()
-}
-
-start()
+startDB()
+updateNodes()
+startAPI()
+spawnSCP()
+startSync()
+startInspect()
