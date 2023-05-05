@@ -15,7 +15,7 @@ const scpfiles = async (req, res) => res.json(await getSCPFiles())
 const startAPI = () => {
     killPort(process.self.apiport)
     .then(() => {})
-    .catch(err => console.log(`Error on shutting port ${process.self.apiport}: ${err}`))
+    .catch(err => {})
     .finally(() => {
         const api = express()
         api.use(express.json({limit: '2mb'}))

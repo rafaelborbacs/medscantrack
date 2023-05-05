@@ -6,7 +6,7 @@ const storescp = path.join('.', 'dcm4chee', 'bin', 'storescp')
 const spawnSCP = () => {
     killPort(process.self.scpport)
     .then(() => {})
-    .catch(err => console.log(`Error on shutting port ${process.self.scpport}: ${err}`))
+    .catch(err => {})
     .finally(() => {
         const args = `--accept-unknown -b ${process.self.aetitle}:${process.self.scpport} --directory ${process.self.scpfolder}`
         const scp = spawn(storescp, args.split(' '), {shell:true})
