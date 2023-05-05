@@ -15,36 +15,6 @@ const timeFormat = (time) => {
         + `${seconds.toFixed(2)}s`
 }
 
-const sync = async () => {
-    let idle = true
-    const localFiles = getSCPFiles()
-    if(localFiles.length > 0){
-        for(const node of process.self.nodes){
-            const remoteFiles = await checkSCP(node)
-            if(remoteFiles){
-                const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
-                if(missingFiles.length > 0){
-                    idle = false
-                    for(const file of missingFiles)
-                        await copyFile(node, file)
-                    await storeSCUNode(node, missingFiles.length)
-                    await clearDirNode(node)
-                }
-            }
-        }
-    }
-    return idle
-}
-
-const startSync = async () => {
-    let idle = true
-    while(true){
-        if(idle)
-            await sleep(10000)
-        idle = await sync()
-    }
-}
-
 const checkSCP = async (node) => new Promise((resolve, reject) => {
     request({
         url: `http://${node.host}:${node.apiport}/scpfiles`,
@@ -108,5 +78,26 @@ const clearDirNode = async (node) => new Promise((resolve, reject) => {
         })
     }
 })
+
+const startSync = async () => {
+    while(true){
+        await sleep(10000)
+        const localFiles = getSCPFiles()
+        if(localFiles.length > 0){
+            for(const node of process.self.nodes){
+                const remoteFiles = await checkSCP(node)
+                if(remoteFiles){
+                    const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
+                    if(missingFiles.length > 0){
+                        for(const file of missingFiles)
+                            await copyFile(node, file)
+                        await storeSCUNode(node, missingFiles.length)
+                        await clearDirNode(node)
+                    }
+                }
+            }
+        }
+    }
+}
 
 module.exports = startSync

@@ -31,17 +31,13 @@ const getMetadicom = async (file) => new Promise((resolve, reject) => {
 })
 
 const startInspect = async () => {
-    let idle = true
     while(true){
-        if(idle)
-            await sleep(27000)
-        idle = true
+        await sleep(27000)
         const files = getSCPFiles(true)
         if(files.length > 0){
             const dbFiles = await db.find('file', {name: {$in: files}}, {name: 1, _id: 0})
             const nonDbFiles = files.filter(file => dbFiles.find(dbFile => dbFile.name === file) === undefined)
             if(nonDbFiles.length > 0){
-                idle = false
                 console.log(`Metadata [${nonDbFiles.length} new files]`)
                 for(const file of nonDbFiles){
                     const metadicom = await getMetadicom(file)
