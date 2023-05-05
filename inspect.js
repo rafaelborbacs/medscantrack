@@ -7,7 +7,7 @@ const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
 
 const getMetadicom = async (file) => new Promise((resolve, reject) => {
     exec(`dcmdump +P "0008,0016" +P "0008,0018" +P "0010,0020" +P "0008,0060" +P "0008,0020" ${process.self.scpfolder}/${file}`, (err, stdout, stderr) => {
-        if (!err){
+        if(!err){
             try {
                 const metadicom = {}
                 const arr = stdout.split("\n").map(line => line.trim().replace(/\s+/g, ' ').replace(/=|\[|\]|\(|\)/g, '').split(" #"))

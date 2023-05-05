@@ -63,7 +63,7 @@ const updateNodes = async () => {
 const mkdirNode = async (node) => new Promise((resolve, reject) => {
     const folder = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`)
     fs.mkdir(folder, {recursive: true}, err => {
-        if (err){
+        if(err){
             console.error(`Error on mkdir ${folder}`)
             reject()
         }

@@ -22,7 +22,7 @@ const checkSCP = async (node) => new Promise((resolve, reject) => {
         headers: { "Authorization": `Bearer ${process.self.aetitle}` }
     }, (error, response, body) => {
         if(error) resolve(false)
-        else if (typeof body === 'string')
+        else if(typeof body === 'string')
             try { resolve(JSON.parse(body)) }
             catch (e) { resolve(false) }
         resolve(body)
@@ -33,11 +33,8 @@ const copyFile = async (node, file) => new Promise((resolve, reject) => {
     const source = path.join(process.self.scpfolder, file)
     const destination = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`, file)
     fs.copyFile(source, destination, err => {
-        if (err){
-            console.error(`Error on copying ${file}`)
-            reject()
-        }
-        else resolve()
+        if(err) console.error(`Error on copying ${file}`)
+        resolve()
     })
 })
 
@@ -65,15 +62,15 @@ const storeSCUNode = async (node, filesCount) => new Promise((resolve, reject) =
 
 const clearDirNode = async (node) => new Promise((resolve, reject) => {
     const folder = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`)
-    if (process.platform === 'win32') {
+    if(process.platform === 'win32') {
         exec(`del /S /Q ${folder}\\*`, (err, stdout, stderr) => {
-            if (err) console.error(`Error clearing folder: ${folder}`);
+            if(err) console.error(`Error clearing folder: ${folder}`);
             resolve()
         })
     }
     else {
         exec(`rm -fr ${folder}/*`, (err, stdout, stderr) => {
-            if (err) console.error(`Error clearing folder: ${folder}`);
+            if(err) console.error(`Error clearing folder: ${folder}`);
             resolve()
         })
     }
