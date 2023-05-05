@@ -33,7 +33,7 @@ const copyFile = async (node, file) => new Promise((resolve, reject) => {
     const source = path.join(process.self.scpfolder, file)
     const destination = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`, file)
     fs.copyFile(source, destination, err => {
-        if(err) console.error(`Error on copying ${file}`)
+        if(err) console.error(`Error on copying ${file}: ${err}`)
         resolve()
     })
 })
