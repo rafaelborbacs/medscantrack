@@ -13,7 +13,10 @@ const filter = (req, res, handler) => {
 const scpfiles = async (req, res) => res.json(await getSCPFiles())
 
 const startAPI = () => {
-    killPort(process.self.apiport).then(() => {
+    killPort(process.self.apiport)
+    .then(() => {})
+    .catch(err => console.log(`Error on shutting port ${process.self.apiport}: ${err}`))
+    .finally(() => {
         const api = express()
         api.use(express.json({limit: '2mb'}))
         api.use(express.json())
@@ -31,7 +34,6 @@ const startAPI = () => {
         api.delete('/file', (req, res) => filter(req, res, files.remove))
         api.listen(process.self.apiport, () => console.log(`API is running on port ${process.self.apiport}`))
     })
-    .catch((err) => console.log(`Error on shutting port ${process.self.apiport}`))
 }
 
 module.exports = startAPI
