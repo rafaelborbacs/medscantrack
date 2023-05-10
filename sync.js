@@ -53,9 +53,8 @@ const storeSCUNode = async (node, filesCount) => new Promise((resolve, reject) =
         resolve()
     })
     scu.on('error', code => {
-        console.error(`SCU error: ${code}`)
         const elapsed = new Date() - start
-        console.log(`done in ${timeFormat(new Date(elapsed))}`)
+        console.log(`done in ${timeFormat(new Date(elapsed))} with SCU error: ${code}`)
         resolve()
     })
 })
@@ -64,13 +63,13 @@ const clearDirNode = async (node) => new Promise((resolve, reject) => {
     const folder = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`)
     if(process.platform === 'win32') {
         exec(`del /S /Q ${folder}\\*`, (err, stdout, stderr) => {
-            if(err) console.error(`Error clearing folder: ${folder}`);
+            if(err) console.error(`Error clearing folder: ${folder}`)
             resolve()
         })
     }
     else {
         exec(`rm -fr ${folder}/*`, (err, stdout, stderr) => {
-            if(err) console.error(`Error clearing folder: ${folder}`);
+            if(err) console.error(`Error clearing folder: ${folder}`)
             resolve()
         })
     }
@@ -86,8 +85,10 @@ const startSync = async () => {
                 if(remoteFiles){
                     const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
                     if(missingFiles.length > 0){
-                        for(const file of missingFiles)
-                            await copyFile(node, file)
+                        for(const file of missingFiles){
+                            try { await copyFile(node, file) }
+                            catch(err){}
+                        }
                         await storeSCUNode(node, missingFiles.length)
                         await clearDirNode(node)
                     }

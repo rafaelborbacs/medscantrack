@@ -18,7 +18,7 @@ const startAPI = () => {
     .catch(err => {})
     .finally(() => {
         const api = express()
-        api.use(express.json({limit: '2mb'}))
+        api.use(express.json({limit: '4mb'}))
         api.use(express.json())
         api.use((req, res, next) => {
             res.setHeader('Access-Control-Allow-Origin', '*')
