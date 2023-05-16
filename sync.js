@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const request = require('request')
 const { exec, spawn } = require('child_process')
-const getSCPFiles = require('./files.js')
+const { getSCPFiles } = require('./scpfiles.js')
 
 const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
 
@@ -17,9 +17,9 @@ const timeFormat = (time) => {
 
 const checkSCP = async (node) => new Promise((resolve, reject) => {
     request({
-        url: `http://${node.host}:${node.apiport}/scpfiles`,
+        url: `${node.apiprotocol}://${node.host}:${node.apiport}/scpfiles`,
         timeout: 10000,
-        headers: { "Authorization": `Bearer ${process.self.aetitle}` }
+        headers: { "Authorization": `Bearer ${process.self.aetitle}`, "name": node.name }
     }, (error, response, body) => {
         if(error) resolve(false)
         else if(typeof body === 'string')
@@ -44,7 +44,7 @@ const storeSCUNode = async (node, filesCount) => new Promise((resolve, reject) =
     const source = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`)
     const destination = `${process.self.aetitle}@${node.host}:${node.scpport}`
     console.log(`SCU ${source} --> ${destination} [${filesCount} files]`)
-    const scu = spawn(storescu, ['-c', destination, source], {shell:true})
+    const scu = spawn(storescu, ['--tls-aes','-c', destination, source], {shell:true})
     scu.stdout.on('data', () => {})
     scu.stderr.on('data', () => {})
     scu.on('close', code => {
@@ -98,4 +98,4 @@ const startSync = async () => {
     }
 }
 
-module.exports = startSync
+module.exports = { startSync }

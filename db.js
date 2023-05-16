@@ -2,7 +2,7 @@ const Db = require('tingodb')().Db
 
 let db = null
 
-const startDB = async () => {
+const startDB = () => {
     db = new Db(process.self.dbfolder, {})
     db.collection('file').ensureIndex({name: 1}, {unique: true}, (err, indexName) => console.log(`Index created: ${indexName}`))
     console.log(`DB is running embedded`)

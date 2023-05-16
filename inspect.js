@@ -1,6 +1,6 @@
 const fs = require('fs')
 const { exec } = require('child_process')
-const getSCPFiles = require('./files.js')
+const { getSCPFiles } = require('./scpfiles.js')
 const db = require('./db.js')
 
 const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
@@ -56,4 +56,4 @@ const startInspect = async () => {
     }
 }
 
-module.exports = startInspect
+module.exports = { startInspect }
