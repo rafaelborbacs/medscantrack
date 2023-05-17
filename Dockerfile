@@ -1,4 +1,4 @@
-FROM alpine
+FROM ubuntu
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl\
     screen\
     wget\
-    software-properties-commo\
     apt-transport-https\
     ca-certificates\
     lsb-release\
@@ -27,13 +26,14 @@ RUN apt-get install -y nodejs
 RUN mkdir /db
 RUN mkdir /scp
 RUN mkdir ./medscantrack
-COPY ./* ./medscantrack
+COPY ./* ./medscantrack/
 WORKDIR /home/medscantrack
 RUN npm install
+RUN npm install -g pm2
 RUN unzip ./dcm4chee.zip
 
-#RUN chmod +x ./scdeinit.sh
-#ENTRYPOINT ["./scdeinit.sh"]
+RUN chmod +x ./entrypoint.sh
+ENTRYPOINT ["./entrypoint.sh"]
 
 EXPOSE 8080
 EXPOSE 6000
