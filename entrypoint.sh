@@ -1,2 +1,2 @@
 #!/bin/bash
-pm2 start medscan.js
+pm2 start medscan.js --no-daemon
