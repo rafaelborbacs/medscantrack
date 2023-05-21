@@ -4,9 +4,7 @@ const Joi = require('joi-oid')
 const schemaPut = Joi.object({
     aetitle: Joi.string().min(1).max(16),
     name: Joi.string().min(2).max(16),
-    scpport: Joi.number().min(1).max(99999),
-    apiport: Joi.number().min(1).max(99999),
-    startws: Joi.bool()
+    wsmirror: Joi.string().min(2).max(200)
 }).unknown(false)
 
 const config = () => {
@@ -16,7 +14,7 @@ const config = () => {
     process.argv.slice(2).forEach(arg => {
         if (arg.startsWith('--')){
             const [key, value] = arg.substring(2).split('=')
-            argv[key] = value
+            argv[key] = value.replace('"','').replace("'","")
         }
     })
     process.self = {...env, ...argv}
@@ -26,10 +24,14 @@ const reconfig = (req, res) => {
     const configs = req.body
     const validation = schemaPut.validate(configs)
     if(validation.error)
-        return res.status(400).send({validation, msg:'error'})
+        return res.status(400).json({validation, msg:'error'})
     const self = process.self
     process.self = {...self, ...configs}
-    return res.send({msg:'ok'})
+    return res.json({msg:'ok'})
 }
 
-module.exports = { config, reconfig }
+const getConfig = (req, res) => {
+    res.json(process.self)
+}
+
+module.exports = { config, reconfig, getConfig }

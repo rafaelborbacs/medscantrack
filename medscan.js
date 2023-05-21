@@ -4,8 +4,8 @@ const { startSCP } = require('./scp.js')
 const { startSync } = require('./sync.js')
 const { startInspect } = require('./inspect.js')
 const { updateNodes } = require('./nodes.js')
-const { config } = require('./config.js')
-const { startWS } = require('./wsclient.js')
+const { config } = require('./configs.js')
+const { startWS } = require('./wsmirror.js')
 
 config()
 
