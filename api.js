@@ -40,7 +40,7 @@ const startAPI = () => {
         api.post('/stopscp', (req, res) => filter(req, res, stopSCP))
         api.post('/startscp', (req, res) => filter(req, res, startSCP))
         api.get('/config', (req, res) => filter(req, res, getConfig))
-        api.put('/reconfig', (req, res) => filter(req, res, reconfig))
+        api.put('/config', (req, res) => filter(req, res, reconfig))
         api.post('/restartws', (req, res) => filter(req, res, restartWS))
         api.get('/statusws', (req, res) => filter(req, res, statusWS))
         api.post('/mirrorscp', upload.single('file'), (req, res) => {
@@ -52,10 +52,11 @@ const startAPI = () => {
             const writeStream = fs.createWriteStream(targetFilePath)
             readStream.pipe(writeStream)
             readStream.on('end', () => {
-                fs.unlinkSync(sourceFilePath)
+                try{ fs.unlink(sourceFilePath) }catch(err){}
                 return res.json({msg: 'File uploaded'})
             })
             readStream.on('error', () => {
+                try{ fs.unlink(sourceFilePath) }catch(err){}
                 return res.status(500).json({ message: 'Error uploading file' })
             })
         })

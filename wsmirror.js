@@ -7,7 +7,6 @@ const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
 
 let ws = null
 const connectWS = () => {
-    const tempFilePath = path.join(process.self.scpfolder, 'mirror', 'mirror.zip')
     console.log('Attempting to connect WS')
     try {
         ws = new WebSocket(process.self.wsmirror)
@@ -18,6 +17,7 @@ const connectWS = () => {
                 authorization:  `Bearer ${process.self.aetitle}`,
                 name: process.self.name
             }))
+            const tempFilePath = path.join(process.self.scpfolder, 'mirror', 'mirror.zip')
             let fileStream = null
             ws.on('message', (data, isBinary) => {
                 if(data == '<EOF></EOF>'){
