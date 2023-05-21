@@ -34,6 +34,3 @@ RUN unzip ./dcm4chee.zip
 
 RUN chmod +x ./entrypoint.sh
 ENTRYPOINT ["./entrypoint.sh"]
-
-EXPOSE 8080
-EXPOSE 6000
