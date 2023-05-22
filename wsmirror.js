@@ -56,7 +56,7 @@ const connectWS = () => {
             })
             ws.on('close', () => console.error('WS closed'))
         })
-        ws.on('error', err => console.error('WS runtime error:', err))
+        ws.on('error', err => console.error(`WS runtime error: ${err}`))
     }
     catch(err){
         console.error(`WS connecting error: ${err}`)
