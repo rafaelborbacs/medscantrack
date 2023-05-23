@@ -1,5 +1,8 @@
 const Joi = require('joi-oid')
+const path = require('path')
+const fs = require('fs')
 const axios = require('axios')
+const { exec } = require('child_process')
 
 const schemaGet = Joi.object({
     url: Joi.string().min(3).required(),
@@ -9,21 +12,10 @@ const schemaGet = Joi.object({
 }).unknown(false)
 
 const unzipFile = async (zipPath, aetitle, folder) => new Promise((resolve, reject) => {
-    if(process.platform === 'win32') {
-        exec(`peazip.exe -ext2folder -password=${aetitle} ${zipPath} -d ${folder}`, (err, stdout, stderr) => {
-            console.log(`---> unzip ---> ${err}`)
-            console.log(`---> unzip ---> ${stdout}`)
-            console.log(`---> unzip ---> ${stderr}`)
-            if(err) console.error(`Error clearing folder: ${folder}`)
-            resolve()
-        })
-    }
-    else {
-        exec(`unzip -P ${aetitle} ${zipPath} -d ${folder}`, (err, stdout, stderr) => {
-            if(err) console.error(`Error unziping file: ${zipPath}`)
-            resolve()
-        })
-    }
+    exec(`unzip -P ${aetitle} ${zipPath} -d ${folder}`, (err, stdout, stderr) => {
+        if(err) console.error(`Error unziping file: ${zipPath}`)
+        resolve()
+    })
 })
 
 const onNotify = async (req, res) => {
@@ -42,27 +34,27 @@ const onNotify = async (req, res) => {
             headers: { "Authorization": `Bearer ${aetitle}` }
         })
         const zipName =  `${uuid}.zip`
-        const zipPath = path.join(scpfolder, zipName)
+        const zipFolder = path.join(scpfolder, uuid)
+        fs.mkdirSync(zipFolder, {recursive: true})
+        const zipPath = path.join(zipFolder, zipName)
         const writer = fs.createWriteStream(zipPath)
         response.data.pipe(writer)
         writer.on('finish', async () => {
             try { writer.end() } catch (error) {}
             await unzipFile(zipPath, aetitle, scpfolder)
+            fs.rmSync(zipFolder, {recursive: true, force: true})
             res.json({msg:'ok'})
         })
         writer.on('error', error => {
-            const msg = `Runtime error on receiving SCP zip file: ${error}`
-            console.error(msg)
+            const msg = `Runtime error on receiving mirror file`
+            console.error(msg, error)
             res.status(500).json({msg})
             try { writer.end() } catch (error) {}
         })
     } catch (error) {
-        const msg = `Error on receiving zip file: ${error}`
-        console.log(msg)
-        if(error.response && error.response.status)
-            res.status(error.response.status).json({msg})
-        else 
-            res.status(500).json({msg})
+        const msg = `Error on receiving mirror file`
+        console.error(msg, error)
+        res.status(500).json({msg})
     }
 }
 

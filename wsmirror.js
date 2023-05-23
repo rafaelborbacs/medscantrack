@@ -1,6 +1,6 @@
 const WebSocket = require('ws')
-const fs = require('fs')
 const path = require('path')
+const fs = require('fs')
 const request = require('request')
 
 const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))

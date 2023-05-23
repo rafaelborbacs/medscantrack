@@ -61,18 +61,10 @@ const storeSCUNode = async (node, missingFiles) => new Promise((resolve, reject)
 
 const clearDirNode = async (node) => new Promise((resolve, reject) => {
     const folder = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`)
-    if(process.platform === 'win32') {
-        exec(`del /S /Q ${folder}\\*`, (err, stdout, stderr) => {
-            if(err) console.error(`Error clearing folder: ${folder}`)
-            resolve()
-        })
-    }
-    else {
-        exec(`rm -fr ${folder}/*`, (err, stdout, stderr) => {
-            if(err) console.error(`Error clearing folder: ${folder}`)
-            resolve()
-        })
-    }
+    exec(`rm -fr ${folder}/*`, (err, stdout, stderr) => {
+        if(err) console.error(`Error clearing folder: ${folder}`)
+        resolve()
+    })
 })
 
 const startSync = async () => {
@@ -110,13 +102,9 @@ const notifyNode = async (node, sentFiles) => new Promise((resolve, reject) => {
         json: true,
         body: { files: sentFiles, url: baseURL, host: node.host, apiport: node.apiport }
     }, (error, response, body) => {
-        console.log(`ERROR: ${error}`)
-        console.log(`body: ${body}`)
-        if(error) resolve(false)
-        else if(typeof body === 'string')
-            try { resolve(JSON.parse(body)) }
-            catch (e) { resolve(false) }
-        resolve(body)
+        if(error)
+            console.error(`Error no notifying node: ${error}`)
+        resolve()
     })
 })
 
