@@ -8,7 +8,7 @@ const schemaPost = Joi.object({
     name: Joi.string().min(2).max(16).required(),
     scpport: Joi.number().min(1).max(99999).required(),
     apiport: Joi.number().min(1).max(99999).required(),
-    apiprotocol: Joi.string().valid('http', 'https')
+    apiprotocol: Joi.string().valid('http', 'https').required()
 }).unknown(false)
 
 const schemaRemove = Joi.object({

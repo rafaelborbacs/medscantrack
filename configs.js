@@ -28,7 +28,6 @@ const dbconfig = async () => {
     process.self = {...self, ...configDB}
     await db.remove('config', {})
     db.insert('config', process.self)
-    console.log(process.self)
 }
 
 const reconfig = async (req, res) => {

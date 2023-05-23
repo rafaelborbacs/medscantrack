@@ -1,7 +1,5 @@
 const killPort = require('kill-port')
 const express = require('express')
-const multer = require('multer')
-const upload = multer({ dest: 'uploads/' })
 const fs = require('fs')
 const nodes = require('./nodes.js')
 const files = require('./files.js')
@@ -9,6 +7,7 @@ const { getSCPFiles } = require('./scpfiles.js')
 const { startSCP, stopSCP } = require('./scp.js')
 const { reconfig, getConfig } = require('./configs.js')
 const { restartWS, statusWS } = require('./wsmirror.js')
+const { onNotify } = require('./scpmirror.js')
 
 const filter = (req, res, handler) => {
     if(req && req.headers['authorization'] === `Bearer ${process.self.aetitle}`)
@@ -43,23 +42,7 @@ const startAPI = () => {
         api.put('/config', (req, res) => filter(req, res, reconfig))
         api.post('/restartws', (req, res) => filter(req, res, restartWS))
         api.get('/statusws', (req, res) => filter(req, res, statusWS))
-        api.post('/mirrorscp', upload.single('file'), (req, res) => {
-            if (!req || !req.file)
-                return res.json({msg: 'No file uploaded'})
-            const sourceFilePath = req.file.path
-            const targetFilePath = `C:\\temp\\scpmirror\\${req.file.originalname}`
-            const readStream = fs.createReadStream(sourceFilePath)
-            const writeStream = fs.createWriteStream(targetFilePath)
-            readStream.pipe(writeStream)
-            readStream.on('end', () => {
-                try{ fs.unlink(sourceFilePath) }catch(err){}
-                return res.json({msg: 'File uploaded'})
-            })
-            readStream.on('error', () => {
-                try{ fs.unlink(sourceFilePath) }catch(err){}
-                return res.status(500).json({ message: 'Error uploading file' })
-            })
-        })
+        api.post('/notify', (req, res) => filter(req, res, onNotify))
         api.listen(process.self.apiport, () => console.log(`API is running on port ${process.self.apiport}`))
     })
 }
