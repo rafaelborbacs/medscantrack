@@ -10,15 +10,7 @@ const schemaPut = Joi.object({
 
 const config = () => {
     const { aetitle, name, scpport, apiport, wsmirror, scpfolder, dbfolder } = process.env
-    const env = { aetitle, name, scpport, apiport, wsmirror, scpfolder, dbfolder }
-    const argv = {}
-    process.argv.slice(2).forEach(arg => {
-        if (arg.startsWith('--')){
-            const [key, value] = arg.substring(2).split('=')
-            argv[key] = value.replace('"','').replace("'","")
-        }
-    })
-    process.self = {...env, ...argv}
+    process.self = { aetitle, name, scpport, apiport, wsmirror, scpfolder, dbfolder }
 }
 
 const dbconfig = async () => {
