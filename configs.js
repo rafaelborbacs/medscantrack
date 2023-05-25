@@ -5,7 +5,7 @@ const db = require('./db.js')
 const schemaPut = Joi.object({
     aetitle: Joi.string().min(1).max(16),
     name: Joi.string().min(2).max(16),
-    wsmirror: Joi.string().min(2).max(200)
+    wsmirror: Joi.string()
 }).unknown(false)
 
 const config = () => {

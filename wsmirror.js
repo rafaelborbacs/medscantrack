@@ -36,20 +36,18 @@ const connectWS = () => {
                 else {
                     req = JSON.parse(data)
                     const { authorization } = req.headers
-                    const options = {
+                    request({
                         url: `http://127.0.0.1:${process.self.apiport}${req.url}`,
-                        timeout: 10000,
                         method: req.method,
                         json: true,
                         body: req.body,
                         headers: { "authorization": authorization, "name": process.self.name }
-                    }
-                    request(options, (error, response, body) => {
+                    }, (error, response, body) => {
                         ws.send(JSON.stringify({
                             event: 'response',
                             uuid: req.uuid,
-                            status: error ? 404 : response.statusCode,
-                            body: error ? error : body
+                            status: response && response.statusCode ? response.statusCode : 500,
+                            body: {...body, ...error}
                         }))
                     })
                 }
@@ -65,9 +63,15 @@ const connectWS = () => {
 
 const startWS = async () => {
     while(true){
-        if(process.self.wsmirror && (!ws || ws.readyState !== WebSocket.OPEN))
-            connectWS()
-        await sleep(10000)
+        if(process.self.wsmirror){
+            if(!ws || ws.readyState !== WebSocket.OPEN)
+                connectWS()
+        }
+        else if(ws){
+            try { ws.close() } catch(err){}
+            ws = null
+        }
+        await sleep(4000)
     }
 }
 

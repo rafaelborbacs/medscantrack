@@ -80,7 +80,7 @@ const startSync = async () => {
 
 const syncNode = async (node, localFiles) => {
     const remoteFiles = await checkSCP(node)
-    if(remoteFiles && remoteFiles.length){
+    if(remoteFiles){
         const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
         if(missingFiles.length > 0){
             for(const file of missingFiles)
@@ -94,8 +94,10 @@ const syncNode = async (node, localFiles) => {
 
 const notifyNode = async (node, sentFiles) => new Promise((resolve, reject) => {
     const baseURL = `${node.apiprotocol}://${node.host}:${node.apiport}`
+    const url = `${baseURL}/notify`
+    console.log(`Notify ${url} -> ${sentFiles.length} files`)
     request({
-        url: `${baseURL}/notify`,
+        url,
         timeout: Infinity,
         headers: { "Authorization": `Bearer ${process.self.aetitle}`, "name": node.name },
         method: 'POST',
