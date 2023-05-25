@@ -57,20 +57,20 @@ const onNotify = async (req, res) => {
         const writer = fs.createWriteStream(zipPath)
         response.data.pipe(writer)
         writer.on('finish', async () => {
-            const msg = `Finished receiving mirror file: ${zipPath}`
+            const msg = `Done receiving mirror file: ${zipPath}`
             console.log(msg)
             try { writer.end() } catch (error) {}
             await unzipFile(zipPath, aetitle, zipFolder)
             await storeSCUSelf(zipFolder)
             res.json({msg})
-            try { fs.rmSync(zipFolder, {recursive: true, force: true}) } catch (error) {}   
+            exec(`rm -fr ${zipFolder}`, () => {})
         })
         writer.on('error', error => {
             const msg = `Runtime error on receiving mirror file`
             console.error(msg, error)
             res.status(500).json({msg})
             try { writer.end() } catch (error) {}
-            try { fs.rmSync(zipFolder, {recursive: true, force: true}) } catch (error) {}
+            exec(`rm -fr ${zipFolder}`, () => {})
         })
     } catch (error) {
         const msg = `Error on receiving mirror file`

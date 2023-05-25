@@ -47,7 +47,7 @@ const connectWS = () => {
                             event: 'response',
                             uuid: req.uuid,
                             status: response && response.statusCode ? response.statusCode : 500,
-                            body: {...body, ...error}
+                            body: body ? body : (error ? error : {msg: 'error'})
                         }))
                     })
                 }
@@ -71,7 +71,7 @@ const startWS = async () => {
             try { ws.close() } catch(err){}
             ws = null
         }
-        await sleep(4000)
+        await sleep(5000)
     }
 }
 
