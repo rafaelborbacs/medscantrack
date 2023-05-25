@@ -80,7 +80,7 @@ const startSync = async () => {
 
 const syncNode = async (node, localFiles) => {
     const remoteFiles = await checkSCP(node)
-    if(remoteFiles){
+    if(remoteFiles && remoteFiles.length >= 0){
         const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
         if(missingFiles.length > 0){
             for(const file of missingFiles)
