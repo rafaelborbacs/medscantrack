@@ -6,7 +6,6 @@ const files = require('./files.js')
 const { getSCPFiles } = require('./scpfiles.js')
 const { startSCP, stopSCP } = require('./scp.js')
 const { reconfig, getConfig } = require('./configs.js')
-const { restartWS, statusWS } = require('./wsmirror.js')
 const { onNotify } = require('./scpmirror.js')
 
 const filter = (req, res, handler) => {
@@ -40,8 +39,6 @@ const startAPI = () => {
         api.post('/startscp', (req, res) => filter(req, res, startSCP))
         api.get('/config', (req, res) => filter(req, res, getConfig))
         api.put('/config', (req, res) => filter(req, res, reconfig))
-        api.post('/restartws', (req, res) => filter(req, res, restartWS))
-        api.get('/statusws', (req, res) => filter(req, res, statusWS))
         api.post('/notify', (req, res) => filter(req, res, onNotify))
         api.listen(process.self.apiport, () => console.log(`API is running on port ${process.self.apiport}`))
     })

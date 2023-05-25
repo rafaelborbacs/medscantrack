@@ -5,12 +5,12 @@ const db = require('./db.js')
 const schemaPut = Joi.object({
     aetitle: Joi.string().min(1).max(16),
     name: Joi.string().min(2).max(16),
-    wsmirror: Joi.string()
+    httpmirror: Joi.string()
 }).unknown(false)
 
 const config = () => {
-    const { aetitle, name, scpport, apiport, wsmirror, scpfolder, dbfolder } = process.env
-    process.self = { aetitle, name, scpport, apiport, wsmirror, scpfolder, dbfolder }
+    const { aetitle, name, scpport, apiport, httpmirror, scpfolder, dbfolder } = process.env
+    process.self = { aetitle, name, scpport, apiport, httpmirror, scpfolder, dbfolder }
 }
 
 const dbconfig = async () => {

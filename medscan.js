@@ -5,7 +5,7 @@ const { startSync } = require('./sync.js')
 const { startInspect } = require('./inspect.js')
 const { updateNodes } = require('./nodes.js')
 const { config, dbconfig } = require('./configs.js')
-const { startWS } = require('./wsmirror.js')
+const { startHTTPMirror } = require('./httpmirror.js')
 
 const medscan = async () => {
     config()
@@ -17,7 +17,7 @@ const medscan = async () => {
     startSCP()
     startSync()
     startInspect()
-    startWS()
+    startHTTPMirror()
 }
 
 medscan()
