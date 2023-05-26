@@ -19,7 +19,7 @@ const checkSCP = async (node) => new Promise((resolve, reject) => {
     request({
         url: `${node.apiprotocol}://${node.host}:${node.apiport}/scpfiles`,
         timeout: 20000,
-        headers: { "Authorization": `Bearer ${process.self.aetitle}`, "name": node.name }
+        headers: { "authorization": `Bearer ${process.self.aetitle}`, "name": node.name }
     }, (error, response, body) => {
         if(error) resolve(false)
         else if(typeof body === 'string')
@@ -99,7 +99,7 @@ const notifyNode = async (node, sentFiles) => new Promise((resolve, reject) => {
     request({
         url,
         timeout: Infinity,
-        headers: { "Authorization": `Bearer ${process.self.aetitle}`, "name": node.name },
+        headers: { "authorization": `Bearer ${process.self.aetitle}`, "name": node.name },
         method: 'POST',
         json: true,
         body: { files: sentFiles, url: baseURL, host: node.host, apiport: node.apiport }

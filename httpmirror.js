@@ -1,5 +1,3 @@
-const path = require('path')
-const fs = require('fs')
 const request = require('request')
 
 const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
@@ -8,33 +6,38 @@ const mirrorGET = async () => new Promise((resolve, reject) => {
     request({
         url: `${process.self.httpmirror}/get`,
         json: true,
-        headers: { "authorization": authorization, "name": process.self.name }
+        timeout: 10000,
+        headers: { "authorization": `Bearer ${process.self.aetitle}`, "name": process.self.name }
     }, (error, response, body) => {
-        if(error)
+        if(error){
             console.log(`httpmirror error on GET: ${error}`)
+            return resolve(false)
+        }
         resolve(body)
     })
 })
 
-const mirrorSELF = async (conn) => new Promise((resolve, reject) => {
+const mirrorSELF = async (req) => new Promise((resolve, reject) => {
     request({
-        url: `http://127.0.0.1:${process.self.apiport}${conn.req.baseUrl}`,
-        method: conn.req.method,
+        url: `http://127.0.0.1:${process.self.apiport}${req.url}`,
+        method: req.method,
         json: true,
-        body: conn.req.body,
-        headers: conn.req.headers
+        body: req.body,
+        headers: req.headers
     }, (error, response, body) => {
-        if(error)
-            console.log(`httpmirror error on SELF: ${error}`)
-        resolve(body)
+        if(error){
+            console.log('httpmirror error on SELF:', error)
+            return resolve(false)
+        }
+        resolve({body, status: response.statusCode})
     })
 })
 
-const mirrorPUT = async (conn, body) => new Promise((resolve, reject) => {
+const mirrorPUT = async (req, body) => new Promise((resolve, reject) => {
     request({
         url: `${process.self.httpmirror}/put`,
         json: true,
-        headers: { "authorization": authorization, "name": process.self.name, uuid: conn.uuid },
+        headers: req.headers,
         method: 'PUT',
         json: true,
         body
@@ -45,22 +48,18 @@ const mirrorPUT = async (conn, body) => new Promise((resolve, reject) => {
     })
 })
 
-const startHTTPMirror = () => {
+const startHTTPMirror = async () => {
     while(true){
         await sleep(1000)
-        const conn = await mirrorGET()
-        console.log('(1): ' + conn)
-        if(conn){
-            const body = await mirrorSELF(conn)
-            console.log('(2): ' + body)
-            const conn = await mirrorPUT(conn, body)
-            console.log('(3): ' + conn)
+        if(process.self.httpmirror){
+            const req = await mirrorGET()
+            if(req){
+                const response = await mirrorSELF(req)
+                if(response)
+                    await mirrorPUT(req, response)
+            }
         }
     }
 }
-
-req = JSON.parse(data)
-const { authorization } = req.headers
-
 
 module.exports = { startHTTPMirror }
