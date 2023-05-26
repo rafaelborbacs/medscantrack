@@ -18,7 +18,7 @@ const timeFormat = (time) => {
 const checkSCP = async (node) => new Promise((resolve, reject) => {
     request({
         url: `${node.apiprotocol}://${node.host}:${node.apiport}/scpfiles`,
-        timeout: 20000,
+        timeout: 30000,
         headers: { "authorization": `Bearer ${process.self.aetitle}`, "name": node.name }
     }, (error, response, body) => {
         if(error) resolve(false)
