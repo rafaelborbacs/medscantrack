@@ -6,7 +6,6 @@ const mirrorGET = () => {
     request({
         url: `${process.self.httpmirror}/get`,
         json: true,
-        timeout: 30000,
         headers: { "authorization": `Bearer ${process.self.aetitle}`, "name": process.self.name }
     }, (error, response, body) => {
         if(error)
@@ -21,7 +20,6 @@ const mirrorSELF = (req) => {
         url: `http://127.0.0.1:${process.self.apiport}${req.url}`,
         method: req.method,
         json: true,
-        timeout: 20000,
         body: req.body,
         headers: req.headers
     }, (error, response, body) => {
@@ -36,7 +34,6 @@ const mirrorPUT = (req, body) => {
     request({
         url: `${process.self.httpmirror}/put`,
         json: true,
-        timeout: 60000,
         headers: req.headers,
         method: 'PUT',
         json: true,

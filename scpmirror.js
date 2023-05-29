@@ -44,11 +44,11 @@ const onNotify = async (req, res) => {
     if(host === process.self.host && apiport === process.self.apiport)
         return res.json({msg:'no action'})
     try {
-        const { aetitle, scpfolder } = process.self
+        const { aetitle, scpfolder, name } = process.self
         const uuid = Math.random().toString(36).substring(2, 9)
-        const response = await axios.post(`${url}/mirrorfiles`, { aetitle, files, uuid }, {
+        const response = await axios.post(`${url}/mirrorfiles`, { aetitle, name, files, uuid }, {
             responseType: 'stream',
-            headers: { "Authorization": `Bearer ${aetitle}` }
+            headers: { "Authorization": `Bearer ${aetitle}`, "name": name }
         })
         const zipName =  `${uuid}.zip`
         const zipFolder = path.join(scpfolder, uuid)
@@ -66,15 +66,15 @@ const onNotify = async (req, res) => {
             exec(`rm -fr ${zipFolder}`, () => {})
         })
         writer.on('error', error => {
-            const msg = `Runtime error on receiving mirror file`
-            console.error(msg, error)
+            const msg = `Runtime error on receiving mirror file: ${error}`
+            console.error(msg)
             res.status(500).json({msg})
             try { writer.end() } catch (error) {}
             exec(`rm -fr ${zipFolder}`, () => {})
         })
     } catch (error) {
-        const msg = `Error on receiving mirror file`
-        console.error(msg, error)
+        const msg = `Error on receiving mirror file: ${error}`
+        console.error(msg)
         res.status(500).json({msg})
     }
 }
