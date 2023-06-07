@@ -22,6 +22,7 @@ const startSCP = (req, res) => {
             const msg = `SCP started at ${process.self.aetitle}:${process.self.scpport}`
             console.log(msg)
             if(res) res.json({msg})
+            process.self.scp = true
         })
     }
 }
@@ -33,6 +34,7 @@ const stopSCP = (req, res) => {
             console.log(msg)
             if(res) res.json({msg})
             scp = null
+            process.self.scp = false
         })
         scp.kill()
     }
