@@ -27,13 +27,13 @@ const post = async (req, res) => {
         return res.status(400).send({validation, msg:'error'})
     let data = await db.find('node', { name: node.name })
     if(data && data.length > 0)
-        return res.status(409).send({node, msg:'duplicate entry host:name'})
+        return res.send({node, msg:'duplicate entry host:name'})
     data = await db.find('node', { host: node.host, scpport: node.scpport })
     if(data && data.length > 0)
-        return res.status(409).send({node, msg:'duplicate entry host:scpport'})
+        return res.send({node, msg:'duplicate entry host:scpport'})
     data = await db.find('node', { host: node.host, apiport: node.apiport })
     if(data && data.length > 0)
-        return res.status(409).send({node, msg:'duplicate entry host:apiport'})
+        return res.send({node, msg:'duplicate entry host:apiport'})
     const rs = await db.insert('node', node)
     updateNodes()
     res.json({rs, msg:'ok'})
@@ -45,25 +45,22 @@ const remove = async (req, res) => {
     if(validation.error)
         return res.status(400).send({validation, msg:'error'})
     const rs = await db.remove('node', node)
-    updateNodes()
-    res.json({rs, msg:'ok'})
+    await updateNodes()
+    res.json({rs, msg:'ok', nodes: process.self.nodes})
 }
 
 const updateNodes = async () => {
     process.self.nodes = await db.find('node', {})
     for(const node of process.self.nodes)
-        await mkdirNode(node)
+        mkdirNode(node)
 }
 
-const mkdirNode = async (node) => new Promise((resolve, reject) => {
+const mkdirNode = (node) => {
     const folder = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`)
     fs.mkdir(folder, {recursive: true}, err => {
-        if(err){
+        if(err)
             console.error(`Error on mkdir ${folder}`)
-            reject()
-        }
-        else resolve()
     })
-})
+}
 
 module.exports = { get, post, remove, updateNodes }
