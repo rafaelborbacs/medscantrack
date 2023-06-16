@@ -12,7 +12,7 @@ const schemaPost = Joi.object({
 }).unknown(false)
 
 const schemaRemove = Joi.object({
-    name: Joi.string().min(1).max(60).required()
+    name: Joi.string().min(1).max(60)
 }).unknown(false)
 
 const get = async (req, res) => {
