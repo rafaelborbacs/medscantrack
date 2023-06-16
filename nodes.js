@@ -45,8 +45,8 @@ const remove = async (req, res) => {
     if(validation.error)
         return res.status(400).send({validation, msg:'error'})
     const rs = await db.remove('node', node)
-    await updateNodes()
-    res.json({rs, msg:'ok', nodes: process.self.nodes})
+    updateNodes()
+    res.json({rs, msg:'ok'})
 }
 
 const updateNodes = async () => {
