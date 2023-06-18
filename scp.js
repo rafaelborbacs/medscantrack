@@ -42,4 +42,11 @@ const stopSCP = (req, res) => {
         res.status(400).json({msg: 'SCP not running'})
 }
 
-module.exports = { startSCP, stopSCP }
+const cleanSCP = (req, res) => {
+    exec(`rm -fr ${process.self.scpfolder}/*`, (err, stdout, stderr) => {
+        if(err) console.error(`Error clearing SPC folder: ${process.self.scpfolder}: ${err}`)
+    })
+    res.json({msg: 'ok'})
+}
+
+module.exports = { startSCP, stopSCP, cleanSCP }
