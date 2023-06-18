@@ -69,7 +69,7 @@ const clearDirNode = async (node) => new Promise((resolve, reject) => {
 
 const startSync = async () => {
     while(true){
-        await sleep(10000)
+        await sleep(7000)
         const localFiles = getSCPFiles()
         if(localFiles.length > 0){
             for(const node of process.self.nodes)

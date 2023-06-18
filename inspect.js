@@ -32,7 +32,7 @@ const getMetadicom = async (file) => new Promise((resolve, reject) => {
 
 const startInspect = async () => {
     while(true){
-        await sleep(27000)
+        await sleep(12000)
         const files = getSCPFiles(true)
         if(files.length > 0){
             const dbFiles = await db.find('file', {name: {$in: files}}, {name: 1, _id: 0})
