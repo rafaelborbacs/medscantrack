@@ -1,6 +1,6 @@
 const killPort = require('kill-port')
 const path = require('path')
-const { spawn } = require('child_process')
+const { spawn, exec } = require('child_process')
 
 let scp = null
 
