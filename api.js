@@ -37,7 +37,7 @@ const startAPI = () => {
         api.delete('/file', (req, res) => filter(req, res, files.remove))
         api.post('/stopscp', (req, res) => filter(req, res, stopSCP))
         api.post('/startscp', (req, res) => filter(req, res, startSCP))
-        api.post('/cleanscp', (req, res) => filter(req, res, cleanSCP))
+        api.delete('/cleanscp', (req, res) => filter(req, res, cleanSCP))
         api.get('/config', (req, res) => filter(req, res, getConfig))
         api.put('/config', (req, res) => filter(req, res, reconfig))
         api.post('/notify', (req, res) => filter(req, res, onNotify))
