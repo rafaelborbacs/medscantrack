@@ -42,7 +42,7 @@ const onNotify = async (req, res) => {
         return res.status(400).send({validation, msg:'error'})
     let { url, host, apiport, files } = req.body
     console.log(`Notified -> ${files.length} files from ${url}`)
-    if(host === process.self.host && apiport === process.self.apiport)
+    if(!process.self.httpmirror)
         return res.json({msg:'no action'})
     const localFiles = getSCPFiles()
     files = files.filter(file => !localFiles.includes(file))
