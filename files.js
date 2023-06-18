@@ -2,7 +2,7 @@ const Joi = require('joi-oid')
 const db = require('./db.js')
 
 const schemaRemove = Joi.object({
-    names: Joi.array().items(Joi.string().min(1)).min(1)
+    names: Joi.array().items(Joi.string().min(1))
 }).unknown(false)
 
 const get = async (req, res) => {
@@ -24,7 +24,7 @@ const remove = async (req, res) => {
     if(validation.error)
         return res.status(400).send({validation, msg:'error'})
     let query = {}
-    if(data.names.length > 0)
+    if(data.names && data.names.length > 0)
         query = {name: {$in: data.names}}
     const rs = await db.remove('file', query)
     return res.json({rs, msg:'ok'})
