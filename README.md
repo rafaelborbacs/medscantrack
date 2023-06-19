@@ -14,11 +14,10 @@ git clone https://github.com/rafaelborbacs/medscantrack.git
 
 ## Configuration
 
-If you wish, you can modify the setup variables in the environment file `.env`. However, you can also set them later:\
+If you wish, you can modify the setup variables in the environment file `.env`:\
 
 ```
 aetitle=[YOUR_NETWORK_SECURITY_KEY_UP_TO_16_CHARS]
-name=[NAME_OF_THIS_NODE]
 httpmirror=[URL_FOR_THE_MIRROR_SERVER_IF_NEEDED_BLANK_OTHERWISE]
 ```
 
