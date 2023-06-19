@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip\
     default-jdk\
     dcmtk\
+    lsof\
     && \
 apt-get clean
 

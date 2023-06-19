@@ -35,7 +35,7 @@ const stopSCP = (req, res) => {
             if(res) res.json({msg})
             scp = null
             process.self.scp = false
-            killPort(process.self.scpport)
+            exec('kill -9 $(lsof -t -i:6000)', () => {})
         })
         scp.kill()
         
