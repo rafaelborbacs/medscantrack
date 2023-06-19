@@ -35,8 +35,10 @@ const stopSCP = (req, res) => {
             if(res) res.json({msg})
             scp = null
             process.self.scp = false
+            killPort(process.self.scpport)
         })
         scp.kill()
+        
     }
     else if(res)
         res.status(400).json({msg: 'SCP not running'})
