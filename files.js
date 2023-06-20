@@ -26,8 +26,8 @@ const remove = async (req, res) => {
     let query = {}
     if(data.names && data.names.length > 0)
         query = {name: {$in: data.names}}
-    const rs = await db.remove('file', query)
-    return res.json({rs, msg:'ok'})
+    db.remove('file', query)
+    return res.json({msg:'ok'})
 }
 
 module.exports = { get, remove }

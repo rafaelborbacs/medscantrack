@@ -1,6 +1,6 @@
-const killPort = require('kill-port')
 const path = require('path')
 const { spawn, exec } = require('child_process')
+const { updateNodes } = require('./nodes.js')
 
 let scp = null
 
@@ -32,6 +32,7 @@ const stopSCP = (req, res) => {
 const cleanSCP = (req, res) => {
     exec(`rm -fr ${process.self.scpfolder}/*`, (err, stdout, stderr) => {
         if(err) console.error(`Error clearing SPC folder: ${process.self.scpfolder}: ${err}`)
+        updateNodes()
     })
     res.json({msg: 'ok'})
 }
