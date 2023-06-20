@@ -1,6 +1,7 @@
 require('dotenv').config()
 const Joi = require('joi-oid')
 const db = require('./db.js')
+const { startSCP, stopSCP } = require('./scp.js')
 
 const schemaPut = Joi.object({
     aetitle: Joi.string().min(1).max(16),
@@ -30,7 +31,9 @@ const reconfig = async (req, res) => {
     process.self = {...self, ...configs}
     await db.remove('config', {})
     db.insert('config', process.self)
-    return res.json({msg:'ok'})
+    stopSCP()
+    setTimeout(startSCP, 4000)
+    res.json({msg:'ok'})
 }
 
 const getConfig = (req, res) => res.json(process.self)
