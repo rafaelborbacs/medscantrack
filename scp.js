@@ -35,10 +35,9 @@ const stopSCP = (req, res) => {
             if(res) res.json({msg})
             scp = null
             process.self.scp = false
-            exec('kill -9 $(lsof -t -i:6000)', () => {})
+            exec(`kill -9 $(lsof -t -i:${process.self.scpport})`, () => {})
         })
         scp.kill()
-        
     }
     else if(res)
         res.status(400).json({msg: 'SCP not running'})
