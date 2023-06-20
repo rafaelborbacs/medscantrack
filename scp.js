@@ -6,41 +6,27 @@ let scp = null
 
 const storescp = path.join('.', 'dcm4chee', 'bin', 'storescp')
 const startSCP = (req, res) => {
-    if(scp){
-        if(res) res.status(400).json({msg: 'SCP already running'})
-    }
-    else {
-        killPort(process.self.scpport)
-        .then(() => {})
-        .catch(err => {})
-        .finally(() => {
-            const args = `--accept-unknown --tls-aes -b ${process.self.aetitle}:${process.self.scpport} --directory ${process.self.scpfolder}`
-            scp = spawn(storescp, args.split(' '), {shell:true})
-            scp.stdout.on('data', () => {})
-            scp.stderr.on('data', () => {})
-            scp.on('error', code => console.error(`SCP error: ${code}`))
-            const msg = `SCP started at ${process.self.aetitle}:${process.self.scpport}`
-            console.log(msg)
-            if(res) res.json({msg})
-            process.self.scp = true
-        })
-    }
+    stopSCP()
+    setTimeout(() => {
+        const args = `--accept-unknown --tls-aes -b ${process.self.aetitle}:${process.self.scpport} --directory ${process.self.scpfolder}`
+        scp = spawn(storescp, args.split(' '), {shell:true})
+        scp.stdout.on('data', () => {})
+        scp.stderr.on('data', () => {})
+        scp.on('error', code => console.error(`SCP error: ${code}`))
+        const msg = `SCP started at ${process.self.aetitle}:${process.self.scpport}`
+        console.log(msg)
+        if(res) res.json({msg})
+        process.self.scp = true
+    }, 4000)
 }
 
 const stopSCP = (req, res) => {
-    if(scp){
-        scp.on('exit', (code, signal) => {
-            const msg = `SCP paused`
-            console.log(msg)
-            if(res) res.json({msg})
-            scp = null
-            process.self.scp = false
-            exec(`kill -9 $(lsof -t -i:${process.self.scpport})`, () => {})
-        })
-        scp.kill()
-    }
-    else if(res)
-        res.status(400).json({msg: 'SCP not running'})
+    exec(`kill -9 $(lsof -t -i:${process.self.scpport})`, () => {})
+    const msg = `SCP stopped`
+    console.log(msg)
+    scp = null
+    process.self.scp = false
+    if(res) res.json({msg})
 }
 
 const cleanSCP = (req, res) => {
