@@ -58,15 +58,19 @@ const inspect = async () => {
                     fs.unlinkSync(`${process.self.scpfolder}/${file}`)
                 }
             }
+            return true
         }
     }
+    return false
 }
 
 const startInspect = async () => {
+    let hasNew = false
     while(true){
-        await sleep()
+        if(!hasNew)
+            await sleep()
         console.log(":: inspect ::")
-        await inspect()
+        hasNew = await inspect()
     }
 }
 

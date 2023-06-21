@@ -77,13 +77,15 @@ const clearDirNode = async (node) => new Promise((resolve, reject) => {
 })
 
 const startSync = async () => {
+    let hasNew = false
     while(true){
-        await sleep()
+        if(!hasNew)
+            await sleep()
         console.log(":: sync ::")
         const localFiles = getSCPFiles()
         if(localFiles.length > 0){
             for(const node of process.self.nodes)
-                await syncNode(node, localFiles)
+                hasNew = await syncNode(node, localFiles) | hasNew
         }
     }
 }
@@ -98,8 +100,10 @@ const syncNode = async (node, localFiles) => {
             await storeSCUNode(node, missingFiles)
             await notifyNode(node, missingFiles)
             await clearDirNode(node)
+            return true
         }
     }
+    return false
 }
 
 const notifyNode = async (node, sentFiles) => new Promise((resolve, reject) => {
