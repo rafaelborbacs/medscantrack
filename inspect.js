@@ -14,9 +14,12 @@ const sleep = () => new Promise(resolve => {
 })
 
 const wakeUpInspect = () => {
+    console.log("(1) WAKE UO INSPECT")
     if(sleepTimeout && sleepResolve){
+        console.log("(1.2) WAKE UO INSPECT REALLY")
         clearTimeout(sleepTimeout)
         sleepResolve()
+        console.log("(1.2) WAKE UO INSPECT DID IT")
         sleepResolve = null
     }
 }

@@ -15,9 +15,12 @@ const sleep = () => new Promise(resolve => {
 })
 
 const wakeUpSync = () => {
+    console.log("(1) WAKE UO SYNC")
     if(sleepTimeout && sleepResolve){
+        console.log("(1.2) WAKE UO SYNC REALLY")
         clearTimeout(sleepTimeout)
         sleepResolve()
+        console.log("(1.2) WAKE UO SYNC DID IT")
         sleepResolve = null
     }
 }
