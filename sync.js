@@ -4,7 +4,23 @@ const request = require('request')
 const { exec, spawn } = require('child_process')
 const { getSCPFiles } = require('./scpfiles.js')
 
-const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
+let sleepResolve = null
+let sleepTimeout = null
+const sleep = () => new Promise(resolve => {
+    sleepResolve = resolve
+    sleepTimeout = setTimeout(() => {
+        sleepResolve = null
+        resolve()
+    }, 60000)
+})
+
+const wakeUpSync = () => {
+    if(sleepTimeout && sleepResolve){
+        clearTimeout(sleepTimeout)
+        sleepResolve()
+        sleepResolve = null
+    }
+}
 
 const timeFormat = (time) => {
     const hours = Math.floor(time / (60 * 60 * 1000))
@@ -69,7 +85,7 @@ const clearDirNode = async (node) => new Promise((resolve, reject) => {
 
 const startSync = async () => {
     while(true){
-        await sleep(7000)
+        await sleep()
         const localFiles = getSCPFiles()
         if(localFiles.length > 0){
             for(const node of process.self.nodes)
@@ -110,4 +126,4 @@ const notifyNode = async (node, sentFiles) => new Promise((resolve, reject) => {
     })
 })
 
-module.exports = { startSync }
+module.exports = { startSync, wakeUpSync }

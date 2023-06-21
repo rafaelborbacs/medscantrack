@@ -1,5 +1,6 @@
 const Joi = require('joi-oid')
 const db = require('./db.js')
+const { wakeUpInspect } = require('./inspect')
 
 const schemaRemove = Joi.object({
     names: Joi.array().items(Joi.string().min(1))
@@ -27,6 +28,7 @@ const remove = async (req, res) => {
     if(data.names && data.names.length > 0)
         query = {name: {$in: data.names}}
     await db.remove('file', query)
+    wakeUpInspect()
     return res.json({msg:'ok'})
 }
 

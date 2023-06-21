@@ -2,6 +2,7 @@ const path = require('path')
 const { spawn, exec } = require('child_process')
 const { updateNodes } = require('./nodes.js')
 const { wakeUpInspect } = require('./inspect')
+const { wakeUpSync } = require('./sync')
 
 let scp = null
 
@@ -11,7 +12,10 @@ const startSCP = (req, res) => {
     setTimeout(() => {
         const args = `--accept-unknown --tls-aes -b ${process.self.aetitle}:${process.self.scpport} --directory ${process.self.scpfolder}`
         scp = spawn(storescp, args.split(' '), {shell:true})
-        scp.stdout.on('data', wakeUpInspect)
+        scp.stdout.on('data', () => {
+            wakeUpSync()
+            wakeUpInspect()
+        })
         scp.stderr.on('data', () => {})
         scp.on('error', code => console.error(`SCP error: ${code}`))
         const msg = `SCP started at ${process.self.aetitle}:${process.self.scpport}`

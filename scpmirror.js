@@ -5,6 +5,7 @@ const axios = require('axios')
 const { exec, spawn } = require('child_process')
 const { getSCPFiles } = require('./scpfiles')
 const { wakeUpInspect } = require('./inspect')
+const { wakeUpSync } = require('./sync')
 
 const schemaGet = Joi.object({
     url: Joi.string().min(3).required(),
@@ -38,6 +39,7 @@ const storeSCUSelf = async (folder) => new Promise((resolve, reject) => {
 })
 
 const onNotify = async (req, res) => {
+    wakeUpSync()
     wakeUpInspect()
     const validation = schemaGet.validate(req.body)
     if(validation.error)

@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const Joi = require('joi-oid')
 const db = require('./db.js')
+const { wakeUpSync } = require('./sync')
 
 const schemaPost = Joi.object({
     host: Joi.string().min(8).max(64).required(),
@@ -50,6 +51,7 @@ const remove = async (req, res) => {
 }
 
 const updateNodes = async () => {
+    wakeUpSync()
     process.self.nodes = await db.find('node', {})
     for(const node of process.self.nodes)
         mkdirNode(node)
