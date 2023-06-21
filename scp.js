@@ -1,10 +1,20 @@
 const path = require('path')
 const { spawn, exec } = require('child_process')
 const { updateNodes } = require('./nodes.js')
-const { wakeUpInspect } = require('./inspect')
 const { wakeUpSync } = require('./sync')
+const { wakeUpInspect } = require('./inspect')
 
 let scp = null
+let timeoutUpdate = null
+const onSCPEvents = () => {
+    if(timeoutUpdate)
+        clearTimeout(timeoutUpdate)
+    timeoutUpdate = setTimeout(() => {
+        wakeUpSync()
+        wakeUpInspect()
+        timeoutUpdate = null
+    }, 3000)
+}
 
 const storescp = path.join('.', 'dcm4chee', 'bin', 'storescp')
 const startSCP = (req, res) => {
@@ -12,17 +22,8 @@ const startSCP = (req, res) => {
     setTimeout(() => {
         const args = `--accept-unknown --tls-aes -b ${process.self.aetitle}:${process.self.scpport} --directory ${process.self.scpfolder}`
         scp = spawn(storescp, args.split(' '), {shell:true})
-        let timeoutUpdate = null
-        scp.stdout.on('data', () => {
-            if(timeoutUpdate)
-                clearTimeout(timeoutUpdate)
-            timeoutUpdate = setTimeout(() => {
-                wakeUpSync()
-                wakeUpInspect()
-                timeoutUpdate = null
-            }, 5000)
-        })
-        scp.stderr.on('data', () => {})
+        scp.stdout.on('data', onSCPEvents)
+        scp.stderr.on('data', onSCPEvents)
         scp.on('error', code => console.error(`SCP error: ${code}`))
         const msg = `SCP started at ${process.self.aetitle}:${process.self.scpport}`
         console.log(msg)

@@ -37,6 +37,7 @@ const post = async (req, res) => {
         return res.send({node, msg:'duplicate entry host:apiport'})
     const rs = await db.insert('node', node)
     updateNodes()
+    wakeUpSync()
     res.json({rs, msg:'ok'})
 }
 
@@ -51,7 +52,6 @@ const remove = async (req, res) => {
 }
 
 const updateNodes = async () => {
-    wakeUpSync()
     process.self.nodes = await db.find('node', {})
     for(const node of process.self.nodes)
         mkdirNode(node)
