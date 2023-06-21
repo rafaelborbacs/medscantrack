@@ -12,9 +12,15 @@ const startSCP = (req, res) => {
     setTimeout(() => {
         const args = `--accept-unknown --tls-aes -b ${process.self.aetitle}:${process.self.scpport} --directory ${process.self.scpfolder}`
         scp = spawn(storescp, args.split(' '), {shell:true})
+        let timeoutUpdate = null
         scp.stdout.on('data', () => {
-            wakeUpSync()
-            wakeUpInspect()
+            if(timeoutUpdate)
+                clearTimeout(timeoutUpdate)
+            timeoutUpdate = setTimeout(() => {
+                wakeUpSync()
+                wakeUpInspect()
+                timeoutUpdate = null
+            }, 5000)
         })
         scp.stderr.on('data', () => {})
         scp.on('error', code => console.error(`SCP error: ${code}`))
