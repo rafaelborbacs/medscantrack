@@ -3,7 +3,23 @@ const { exec } = require('child_process')
 const { getSCPFiles } = require('./scpfiles.js')
 const db = require('./db.js')
 
-const sleep = (ms) => new Promise(resolve => setTimeout(() => resolve(), ms))
+let sleepResolve = null
+let sleepTimeout = null
+const sleep = () => new Promise(resolve => {
+    sleepResolve = resolve
+    sleepTimeout = setTimeout(() => {
+        sleepResolve = null
+        resolve()
+    }, 60000)
+})
+
+const wakeUpInspect = () => {
+    if(sleepTimeout && sleepResolve){
+        clearTimeout(sleepTimeout)
+        sleepResolve()
+        sleepResolve = null
+    }
+}
 
 const getMetadicom = async (file) => new Promise((resolve, reject) => {
     exec(`dcmdump +P "0008,0016" +P "0008,0018" +P "0010,0020" +P "0008,0060" +P "0008,0020" ${process.self.scpfolder}/${file}`, (err, stdout, stderr) => {
@@ -30,30 +46,34 @@ const getMetadicom = async (file) => new Promise((resolve, reject) => {
     })
 })
 
-const startInspect = async () => {
-    while(true){
-        await sleep(12000)
-        const files = getSCPFiles(true)
-        if(files.length > 0){
-            const dbFiles = await db.find('file', {name: {$in: files}}, {name: 1, _id: 0})
-            const nonDbFiles = files.filter(file => dbFiles.find(dbFile => dbFile.name === file) === undefined)
-            if(nonDbFiles.length > 0){
-                console.log(`Metadata [${nonDbFiles.length} new files]`)
-                for(const file of nonDbFiles){
-                    const metadicom = await getMetadicom(file)
-                    if(metadicom){
-                        try {
-                            await db.insert('file', { name: file, created: Date.now(), metadicom })
-                        } catch (err) {}
-                    }
-                    else {
-                        console.error(`Deleting corrupted file: ${file}`)
-                        fs.unlinkSync(`${process.self.scpfolder}/${file}`)
-                    }
+const inspect = async () => {
+    const files = getSCPFiles(true)
+    if(files.length > 0){
+        const dbFiles = await db.find('file', {name: {$in: files}}, {name: 1, _id: 0})
+        const nonDbFiles = files.filter(file => dbFiles.find(dbFile => dbFile.name === file) === undefined)
+        if(nonDbFiles.length > 0){
+            console.log(`Metadata [${nonDbFiles.length} new files]`)
+            for(const file of nonDbFiles){
+                const metadicom = await getMetadicom(file)
+                if(metadicom){
+                    try {
+                        await db.insert('file', { name: file, created: Date.now(), metadicom })
+                    } catch (err) {}
+                }
+                else {
+                    console.error(`Deleting corrupted file: ${file}`)
+                    fs.unlinkSync(`${process.self.scpfolder}/${file}`)
                 }
             }
         }
     }
 }
 
-module.exports = { startInspect }
+const startInspect = async () => {
+    while(true){
+        await sleep()
+        await inspect()
+    }
+}
+
+module.exports = { startInspect, wakeUpInspect }

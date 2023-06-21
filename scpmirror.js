@@ -4,6 +4,7 @@ const fs = require('fs')
 const axios = require('axios')
 const { exec, spawn } = require('child_process')
 const { getSCPFiles } = require('./scpfiles')
+const { wakeUpInspect } = require('./inspect')
 
 const schemaGet = Joi.object({
     url: Joi.string().min(3).required(),
@@ -37,6 +38,7 @@ const storeSCUSelf = async (folder) => new Promise((resolve, reject) => {
 })
 
 const onNotify = async (req, res) => {
+    wakeUpInspect()
     const validation = schemaGet.validate(req.body)
     if(validation.error)
         return res.status(400).send({validation, msg:'error'})
@@ -72,6 +74,7 @@ const onNotify = async (req, res) => {
                 console.log(`Done processing mirror file`)
                 res.json({msg})
             })
+            wakeUpInspect()
         })
         writer.on('error', error => {
             const msg = `Runtime error on receiving mirror file: ${error}`

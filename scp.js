@@ -21,20 +21,21 @@ const startSCP = (req, res) => {
 }
 
 const stopSCP = (req, res) => {
-    exec(`kill -9 $(lsof -t -i:${process.self.scpport})`, () => {})
-    const msg = `SCP stopped`
-    console.log(msg)
-    scp = null
-    process.self.scp = false
-    if(res) res.json({msg})
+    exec(`kill -9 $(lsof -t -i:${process.self.scpport})`, () => {
+        const msg = `SCP stopped`
+        console.log(msg)
+        scp = null
+        process.self.scp = false
+        if(res) res.json({msg})
+    })
 }
 
 const cleanSCP = (req, res) => {
     exec(`rm -fr ${process.self.scpfolder}/*`, (err, stdout, stderr) => {
         if(err) console.error(`Error clearing SPC folder: ${process.self.scpfolder}: ${err}`)
         updateNodes()
+        res.json({msg: 'ok'})
     })
-    res.json({msg: 'ok'})
 }
 
 module.exports = { startSCP, stopSCP, cleanSCP }
