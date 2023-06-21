@@ -7,21 +7,12 @@ const { getSCPFiles } = require('./scpfiles.js')
 let sleepResolve = null, sleepTimeout = null
 const sleep = () => new Promise(resolve => {
     sleepResolve = resolve
-    sleepTimeout = setTimeout(() => {
-        sleepResolve = null
-        resolve()
-    }, 30000)
+    sleepTimeout = setTimeout(resolve, 300000000)
 })
 
 const wakeUpSync = () => {
-    console.log("(1) WAKE UO SYNC")
-    if(sleepTimeout && sleepResolve){
-        console.log("(1.2) WAKE UO SYNC REALLY")
-        clearTimeout(sleepTimeout)
-        sleepResolve()
-        console.log("(1.2) WAKE UO SYNC DID IT")
-        sleepResolve = null
-    }
+    sleepResolve()
+    clearTimeout(sleepTimeout)
 }
 
 const timeFormat = (time) => {
@@ -88,6 +79,7 @@ const clearDirNode = async (node) => new Promise((resolve, reject) => {
 const startSync = async () => {
     while(true){
         await sleep()
+        console.log(":: sync ::")
         const localFiles = getSCPFiles()
         if(localFiles.length > 0){
             for(const node of process.self.nodes)

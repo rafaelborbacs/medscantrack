@@ -4,17 +4,19 @@ const { updateNodes } = require('./nodes.js')
 const { wakeUpSync } = require('./sync')
 const { wakeUpInspect } = require('./inspect')
 
-let scp = null, timeoutUpdate = null
+let timeoutUpdate = null
+const wake = () => {
+    wakeUpSync()
+    wakeUpInspect()
+    timeoutUpdate = null
+}
 const onSCPEvents = () => {
     if(timeoutUpdate)
         clearTimeout(timeoutUpdate)
-    timeoutUpdate = setTimeout(() => {
-        wakeUpSync()
-        wakeUpInspect()
-        timeoutUpdate = null
-    }, 3000)
+    timeoutUpdate = setTimeout(wake, 3000)
 }
 
+let scp = null
 const storescp = path.join('.', 'dcm4chee', 'bin', 'storescp')
 const startSCP = (req, res) => {
     stopSCP()

@@ -3,25 +3,15 @@ const { exec } = require('child_process')
 const { getSCPFiles } = require('./scpfiles.js')
 const db = require('./db.js')
 
-let sleepResolve = null
-let sleepTimeout = null
+let sleepResolve = null, sleepTimeout = null
 const sleep = () => new Promise(resolve => {
     sleepResolve = resolve
-    sleepTimeout = setTimeout(() => {
-        sleepResolve = null
-        resolve()
-    }, 60000)
+    sleepTimeout = setTimeout(resolve, 300000000)
 })
 
 const wakeUpInspect = () => {
-    console.log("(1) WAKE UO INSPECT")
-    if(sleepTimeout && sleepResolve){
-        console.log("(1.2) WAKE UO INSPECT REALLY")
-        clearTimeout(sleepTimeout)
-        sleepResolve()
-        console.log("(1.2) WAKE UO INSPECT DID IT")
-        sleepResolve = null
-    }
+    sleepResolve()
+    clearTimeout(sleepTimeout)
 }
 
 const getMetadicom = async (file) => new Promise((resolve, reject) => {
@@ -75,6 +65,7 @@ const inspect = async () => {
 const startInspect = async () => {
     while(true){
         await sleep()
+        console.log(":: inspect ::")
         await inspect()
     }
 }
