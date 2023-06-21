@@ -4,8 +4,7 @@ const { updateNodes } = require('./nodes.js')
 const { wakeUpSync } = require('./sync')
 const { wakeUpInspect } = require('./inspect')
 
-let scp = null
-let timeoutUpdate = null
+let scp = null, timeoutUpdate = null
 const onSCPEvents = () => {
     if(timeoutUpdate)
         clearTimeout(timeoutUpdate)

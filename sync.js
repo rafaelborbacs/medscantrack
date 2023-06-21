@@ -4,8 +4,7 @@ const request = require('request')
 const { exec, spawn } = require('child_process')
 const { getSCPFiles } = require('./scpfiles.js')
 
-let sleepResolve = null
-let sleepTimeout = null
+let sleepResolve = null, sleepTimeout = null
 const sleep = () => new Promise(resolve => {
     sleepResolve = resolve
     sleepTimeout = setTimeout(() => {
