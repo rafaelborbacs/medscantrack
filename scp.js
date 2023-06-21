@@ -1,6 +1,7 @@
 const path = require('path')
 const { spawn, exec } = require('child_process')
 const { updateNodes } = require('./nodes.js')
+const { wakeUpInspect } = require('./inspect')
 
 let scp = null
 
@@ -10,19 +11,7 @@ const startSCP = (req, res) => {
     setTimeout(() => {
         const args = `--accept-unknown --tls-aes -b ${process.self.aetitle}:${process.self.scpport} --directory ${process.self.scpfolder}`
         scp = spawn(storescp, args.split(' '), {shell:true})
-        scp.stdout.on('data', () => {
-            console.log(`(1) debug => SCP data received: ${new Date()}`)
-        })
-
-
-        /*scp.stdout.on('readable', () => {
-            let chunk
-            while ((chunk = child.stdout.read()) !== null) {
-            console.log('Child process printed something:', chunk.toString());
-            }
-        })*/
-
-
+        scp.stdout.on('data', wakeUpInspect)
         scp.stderr.on('data', () => {})
         scp.on('error', code => console.error(`SCP error: ${code}`))
         const msg = `SCP started at ${process.self.aetitle}:${process.self.scpport}`
