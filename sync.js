@@ -77,10 +77,11 @@ const clearDirNode = async (node) => new Promise((resolve, reject) => {
 })
 
 const startSync = async () => {
-    let hasNew = false
+    let hasNew
     while(true){
         if(!hasNew)
             await sleep()
+        hasNew = false
         console.log(":: sync ::")
         const localFiles = getSCPFiles()
         if(localFiles.length > 0){
