@@ -5,8 +5,8 @@ const db = require('./db.js')
 const { wakeUpSync } = require('./sync')
 
 const schemaPost = Joi.object({
-    host: Joi.string().min(8).max(64).required(),
-    name: Joi.string().min(2).max(16).required(),
+    host: Joi.string().min(1).max(64).required(),
+    name: Joi.string().min(1).max(16).required(),
     scpport: Joi.number().min(1).max(99999).required(),
     apiport: Joi.number().min(1).max(99999).required(),
     apiprotocol: Joi.string().valid('http', 'https').required()
@@ -37,7 +37,6 @@ const post = async (req, res) => {
         return res.send({node, msg:'duplicate entry host:apiport'})
     const rs = await db.insert('node', node)
     updateNodes()
-    wakeUpSync()
     res.json({rs, msg:'ok'})
 }
 
@@ -55,6 +54,7 @@ const updateNodes = async () => {
     process.self.nodes = await db.find('node', {})
     for(const node of process.self.nodes)
         mkdirNode(node)
+    wakeUpSync()
 }
 
 const mkdirNode = (node) => {
