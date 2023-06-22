@@ -1,4 +1,3 @@
-const fs = require('fs')
 const { exec } = require('child_process')
 const { getSCPFiles } = require('./scpfiles.js')
 const db = require('./db.js')
@@ -55,7 +54,7 @@ const inspect = async () => {
                 }
                 else {
                     console.error(`Deleting corrupted file: ${file}`)
-                    fs.unlinkSync(`${process.self.scpfolder}/${file}`)
+                    exec(`rm -f ${process.self.scpfolder}/${file}`, () => {})
                 }
             }
             return true
