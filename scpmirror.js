@@ -39,13 +39,13 @@ const storeSCUSelf = async (folder) => new Promise((resolve, reject) => {
 })
 
 const onNotify = async (req, res) => {
-    wakeUpSync()
-    wakeUpInspect()
     const validation = schemaGet.validate(req.body)
     if(validation.error)
         return res.status(400).send({validation, msg:'error'})
     let { url, host, apiport, files } = req.body
     console.log(`Notified -> ${files.length} files from ${url}`)
+    wakeUpSync()
+    wakeUpInspect()
     if(!process.self.httpmirror)
         return res.json({msg:'no action'})
     const localFiles = getSCPFiles()
@@ -74,9 +74,9 @@ const onNotify = async (req, res) => {
             await storeSCUSelf(zipFolder)
             exec(`rm -fr ${zipFolder}`, () => {
                 console.log(`Done processing mirror file`)
+                wakeUpInspect()
                 res.json({msg})
             })
-            wakeUpInspect()
         })
         writer.on('error', error => {
             const msg = `Runtime error on receiving mirror file: ${error}`
