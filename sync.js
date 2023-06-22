@@ -11,7 +11,8 @@ const sleep = () => new Promise(resolve => {
 })
 
 const wakeUpSync = () => {
-    sleepResolve()
+    if(sleepResolve)
+        sleepResolve()
     clearTimeout(sleepTimeout)
 }
 
