@@ -10,7 +10,7 @@ const schemaPut = Joi.object({
 
 const config = () => {
     const { aetitle, name, scpport, apiport, httpmirror, scpfolder, dbfolder } = process.env
-    process.self = { aetitle, name, scpport, apiport, httpmirror, scpfolder, dbfolder }
+    process.self = { aetitle, name: name.toUpperCase(), scpport, apiport, httpmirror, scpfolder, dbfolder }
 }
 
 const dbconfig = async () => {
