@@ -1,8 +1,8 @@
-const fs = require('fs')
 const path = require('path')
 const Joi = require('joi-oid')
 const db = require('./db.js')
 const { wakeUpSync } = require('./sync')
+const { exec } = require('child_process')
 
 const schemaPost = Joi.object({
     host: Joi.string().min(1).max(64).required(),
@@ -52,17 +52,11 @@ const remove = async (req, res) => {
 
 const updateNodes = async () => {
     process.self.nodes = await db.find('node', {})
-    for(const node of process.self.nodes)
-        mkdirNode(node)
+    for(const node of process.self.nodes){
+        const folder = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`)
+        exec(`mkdir ${folder}`, () => {})
+    }
     wakeUpSync()
-}
-
-const mkdirNode = (node) => {
-    const folder = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`)
-    fs.mkdir(folder, {recursive: true}, err => {
-        if(err)
-            console.error(`Error on mkdir ${folder}`)
-    })
 }
 
 module.exports = { get, post, remove, updateNodes }
