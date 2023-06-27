@@ -103,7 +103,7 @@ const syncNode = async (node, localFiles) => {
             for(const file of missingFiles)
                 await copyFile(node, file)
             await storeSCUNode(node, missingFiles)
-            notifyNode(node, missingFiles)
+            await notifyNode(node, missingFiles)
             await clearDirNode(node)
             return true
         }
@@ -111,12 +111,13 @@ const syncNode = async (node, localFiles) => {
     return false
 }
 
-const notifyNode = async (node, sentFiles) => {
+const notifyNode = async (node, sentFiles) => new Promise((resolve, reject) => {
     const baseURL = `${node.apiprotocol}://${node.host}:${node.apiport}`
     const url = `${baseURL}/notify`
     console.log(`Notify ${url} -> ${sentFiles.length} files`)
     request({
         url,
+        timeout: Infinity,
         headers: { "authorization": `Bearer ${process.self.aetitle}`, "name": node.name },
         method: 'POST',
         json: true,
@@ -124,7 +125,8 @@ const notifyNode = async (node, sentFiles) => {
     }, (error, response, body) => {
         if(error)
             console.error(`Error no notifying node: ${error}`)
+        resolve()
     })
-}
+})
 
 module.exports = { startSync, wakeUpSync }
