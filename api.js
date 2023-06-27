@@ -16,8 +16,8 @@ const filter = (req, res, handler) => {
 
 const scpfiles = (req, res) => res.json(getSCPFiles())
 const scpfilesCount = (req, res) => res.json(getSCPFiles().length)
-const ongoingscpfiles = (req, res) = res.json(getOnGoingSCPFiles())
-const ongoingscpfilesCount = (req, res) = res.json(getOnGoingSCPFiles().length)
+const ongoingscpfiles = (req, res) => res.json(getOnGoingSCPFiles())
+const ongoingscpfilesCount = (req, res) => res.json(getOnGoingSCPFiles().length)
 
 const startAPI = () => {
     killPort(process.self.apiport)
