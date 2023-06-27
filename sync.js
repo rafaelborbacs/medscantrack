@@ -119,7 +119,7 @@ const syncNode = async (node, localFiles) => {
             for(const file of missingFiles)
                 await copyFile(node, file)
             await storeSCUNode(node, missingFiles)
-            await notifyNode(node, remoteFiles)
+            await notifyNode(node, missingFiles)
             await clearDirNode(node)
             return true
         }
