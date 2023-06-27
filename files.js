@@ -13,10 +13,13 @@ const get = async (req, res) => {
     let projection = undefined
     if(req.query.names)
         projection = {name: 1, _id: 0}
-    let data = await db.find('file', query, projection)
-    if(req.query.count)
-        data = data.length
+    const data = await db.find('file', query, projection)
     return res.json(data)
+}
+
+const count = async (req, res) => {
+    const data = await db.find('file', {}, {_id: 1})
+    return res.json(data.length)
 }
 
 const remove = async (req, res) => {
@@ -32,4 +35,4 @@ const remove = async (req, res) => {
     return res.json({msg:'ok'})
 }
 
-module.exports = { get, remove }
+module.exports = { get, count, remove }

@@ -15,6 +15,7 @@ const filter = (req, res, handler) => {
 }
 
 const scpfiles = async (req, res) => res.json(getSCPFiles())
+const scpfilesCount = async (req, res) => res.json(getSCPFiles().length)
 
 const startAPI = () => {
     killPort(process.self.apiport)
@@ -30,10 +31,12 @@ const startAPI = () => {
             next()
         })
         api.get('/scpfiles', (req, res) => filter(req, res, scpfiles))
+        api.get('/scpfilescount', (req, res) => filter(req, res, scpfilesCount))
         api.get('/node', (req, res) => filter(req, res, nodes.get))
         api.post('/node', (req, res) => filter(req, res, nodes.post))
         api.delete('/node', (req, res) => filter(req, res, nodes.remove))
         api.get('/file', (req, res) => filter(req, res, files.get))
+        api.get('/filecount', (req, res) => filter(req, res, files.count))
         api.delete('/file', (req, res) => filter(req, res, files.remove))
         api.post('/stopscp', (req, res) => filter(req, res, stopSCP))
         api.post('/startscp', (req, res) => filter(req, res, startSCP))
