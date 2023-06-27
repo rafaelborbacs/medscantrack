@@ -6,7 +6,7 @@ const files = require('./files.js')
 const { getSCPFiles } = require('./scpfiles.js')
 const { startSCP, stopSCP, cleanSCP } = require('./scp.js')
 const { reconfig, getConfig } = require('./configs.js')
-const { onNotify } = require('./scpmirror.js')
+const { onNotify, getOnGoingSCPFiles } = require('./scpmirror.js')
 
 const filter = (req, res, handler) => {
     if(req && req.headers['authorization'] === `Bearer ${process.self.aetitle}`)
@@ -14,8 +14,10 @@ const filter = (req, res, handler) => {
     return res.status(401).send({msg:'access denied'})
 }
 
-const scpfiles = async (req, res) => res.json(getSCPFiles())
-const scpfilesCount = async (req, res) => res.json(getSCPFiles().length)
+const scpfiles = (req, res) => res.json(getSCPFiles())
+const scpfilesCount = (req, res) => res.json(getSCPFiles().length)
+const ongoingscpfiles = (req, res) = res.json(getOnGoingSCPFiles())
+const ongoingscpfilesCount = (req, res) = res.json(getOnGoingSCPFiles().length)
 
 const startAPI = () => {
     killPort(process.self.apiport)
@@ -32,6 +34,8 @@ const startAPI = () => {
         })
         api.get('/scpfiles', (req, res) => filter(req, res, scpfiles))
         api.get('/scpfilescount', (req, res) => filter(req, res, scpfilesCount))
+        api.get('/ongoingscpfiles', (req, res) => filter(req, res, ongoingscpfiles))
+        api.get('/ongoingscpfilescount', (req, res) => filter(req, res, ongoingscpfilesCount))
         api.get('/node', (req, res) => filter(req, res, nodes.get))
         api.post('/node', (req, res) => filter(req, res, nodes.post))
         api.delete('/node', (req, res) => filter(req, res, nodes.remove))

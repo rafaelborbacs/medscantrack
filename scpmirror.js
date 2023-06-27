@@ -38,21 +38,30 @@ const storeSCUSelf = async (folder) => new Promise((resolve, reject) => {
     })
 })
 
+let onGoingSCPFiles = []
+const getOnGoingSCPFiles = () => onGoingSCPFiles
+
 const onNotify = async (req, res) => {
+    if(!process.self.httpmirror)
+        return res.json({msg:'no action'})
     const validation = schemaGet.validate(req.body)
     if(validation.error)
         return res.status(400).send({validation, msg:'error'})
     let { url, host, apiport, files } = req.body
-    console.log(`Notified -> ${files.length} files from ${url}`)
+    console.log(`I've been notified -> ${files.length} files by ${url}`)
     wakeUpSync()
     wakeUpInspect()
-    if(!process.self.httpmirror)
-        return res.json({msg:'no action'})
     const localFiles = getSCPFiles()
     files = files.filter(file => !localFiles.includes(file))
-    if(files.length === 0)
-        return res.json({msg:'no action'})
-    console.log(`missing ${files.length}`)
+    if(files.length === 0){
+        const msg = 'already in sync'
+        console.log(msg)
+        return res.json({msg})
+    }
+    const msg = `missing ${files.length} -> reaching mirror for them`
+    console.log(msg)
+    res.json({msg})
+    files.forEach(file => !onGoingSCPFiles.includes(file) && onGoingSCPFiles.push(file))
     try {
         const { aetitle, scpfolder, name } = process.self
         const uuid = Math.random().toString(36).substring(2, 9)
@@ -67,28 +76,27 @@ const onNotify = async (req, res) => {
         const writer = fs.createWriteStream(zipPath)
         response.data.pipe(writer)
         writer.on('finish', async () => {
+            onGoingSCPFiles = onGoingSCPFiles.filter(file => !files.includes(file));
             const msg = `Done receiving mirror file: ${zipPath}`
             console.log(msg)
             try { writer.end() } catch (error) {}
             await unzipFile(zipPath, aetitle, zipFolder)
             await storeSCUSelf(zipFolder)
             exec(`rm -fr ${zipFolder}`, () => {
-                console.log(`Done processing mirror file`)
+                console.log('Done processing mirror file')
                 wakeUpInspect()
-                res.json({msg})
             })
         })
         writer.on('error', error => {
-            const msg = `Runtime error on receiving mirror file: ${error}`
-            console.error(msg)
+            onGoingSCPFiles = onGoingSCPFiles.filter(file => !files.includes(file));
+            console.error(`Runtime error on receiving mirror file: ${error}`)
             try { writer.end() } catch (error) {}
-            exec(`rm -fr ${zipFolder}`, () => res.status(500).json({msg}))
+            exec(`rm -fr ${zipFolder}`, () => {})
         })
     } catch (error) {
-        const msg = `Error on receiving mirror file: ${error}`
-        console.error(msg)
-        res.status(500).json({msg})
+        onGoingSCPFiles = onGoingSCPFiles.filter(file => !files.includes(file));
+        console.error(`Error on receiving mirror file: ${error}`)
     }
 }
 
-module.exports = { onNotify }
+module.exports = { onNotify, getOnGoingSCPFiles }
