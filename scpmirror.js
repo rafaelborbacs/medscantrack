@@ -76,7 +76,7 @@ const onNotify = async (req, res) => {
         const writer = fs.createWriteStream(zipPath)
         response.data.pipe(writer)
         writer.on('finish', async () => {
-            onGoingSCPFiles = onGoingSCPFiles.filter(file => !files.includes(file));
+            onGoingSCPFiles = onGoingSCPFiles.filter(file => !files.includes(file))
             const msg = `Done receiving mirror file: ${zipPath}`
             console.log(msg)
             try { writer.end() } catch (error) {}
@@ -88,13 +88,13 @@ const onNotify = async (req, res) => {
             })
         })
         writer.on('error', error => {
-            onGoingSCPFiles = onGoingSCPFiles.filter(file => !files.includes(file));
+            onGoingSCPFiles = onGoingSCPFiles.filter(file => !files.includes(file))
             console.error(`Runtime error on receiving mirror file: ${error}`)
             try { writer.end() } catch (error) {}
             exec(`rm -fr ${zipFolder}`, () => {})
         })
     } catch (error) {
-        onGoingSCPFiles = onGoingSCPFiles.filter(file => !files.includes(file));
+        onGoingSCPFiles = onGoingSCPFiles.filter(file => !files.includes(file))
         console.error(`Error on receiving mirror file: ${error}`)
     }
 }
