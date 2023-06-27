@@ -39,6 +39,20 @@ const checkSCP = async (node) => new Promise((resolve, reject) => {
     })
 })
 
+const checkOnGoingSCP = async (node) => new Promise((resolve, reject) => {
+    request({
+        url: `${node.apiprotocol}://${node.host}:${node.apiport}/ongoingscpfiles`,
+        timeout: 30000,
+        headers: { "authorization": `Bearer ${process.self.aetitle}`, "name": node.name }
+    }, (error, response, body) => {
+        if(error) resolve(false)
+        else if(typeof body === 'string')
+            try { resolve(JSON.parse(body)) }
+            catch (e) { resolve(false) }
+        resolve(body)
+    })
+})
+
 const copyFile = async (node, file) => new Promise((resolve, reject) => {
     const source = path.join(process.self.scpfolder, file)
     const destination = path.join(process.self.scpfolder, `${node.host}_${node.scpport}`, file)
@@ -97,6 +111,8 @@ const startSync = async () => {
 const syncNode = async (node, localFiles) => {
     console.log(`sync node ${node.host}:${node.apiport}`)
     const remoteFiles = await checkSCP(node)
+    const remoteOnGoingFiles = await checkOnGoingSCP(node)
+    remoteOnGoingFiles.forEach(file => !remoteFiles.includes(file) && remoteFiles.push(file))
     if(remoteFiles && remoteFiles.length >= 0){
         const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
         if(missingFiles.length > 0){
