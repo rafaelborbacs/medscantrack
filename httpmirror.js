@@ -16,8 +16,10 @@ const mirrorGET = () => {
 }
 
 const mirrorSELF = (req) => {
+    const url = `http://127.0.0.1:${process.self.apiport}${req.url}`
+    console.log(`Mirror SELF -> ${url}`)
     request({
-        url: `http://127.0.0.1:${process.self.apiport}${req.url}`,
+        url,
         method: req.method,
         json: true,
         body: req.body,
@@ -31,12 +33,12 @@ const mirrorSELF = (req) => {
 }
 
 const mirrorPUT = (req, body) => {
+    console.log(`Mirror PUT`)
     request({
         url: `${process.self.httpmirror}/put`,
         json: true,
         headers: req.headers,
         method: 'PUT',
-        json: true,
         body
     }, (error, response, body) => {
         if(error)
