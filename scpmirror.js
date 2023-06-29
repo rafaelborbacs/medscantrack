@@ -51,7 +51,7 @@ const onNotify = async (req, res) => {
     console.log(`I've been notified -> ${files.length} files by ${url}`)
     wakeUpSync()
     wakeUpInspect()
-    const localFiles = await getSCPFiles()
+    const localFiles = getSCPFiles()
     files = files.filter(file => !localFiles.includes(file))
     if(files.length === 0){
         const msg = 'already in sync'

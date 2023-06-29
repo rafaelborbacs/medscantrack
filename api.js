@@ -14,8 +14,8 @@ const filter = (req, res, handler) => {
     return res.status(401).send({msg:'access denied'})
 }
 
-const scpfiles = async (req, res) => res.json(await getSCPFiles())
-const scpfilesCount = async (req, res) => res.json((await getSCPFiles()).length)
+const scpfiles = (req, res) => res.json(getSCPFiles())
+const scpfilesCount = (req, res) => res.json(getSCPFiles().length)
 const ongoingscpfiles = (req, res) => res.json(getOnGoingSCPFiles())
 const ongoingscpfilesCount = (req, res) => res.json(getOnGoingSCPFiles().length)
 

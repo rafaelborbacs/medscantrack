@@ -98,7 +98,7 @@ const startSync = async () => {
             await sleep()
         hasNew = false
         console.log(":: sync ::")
-        const localFiles = await getSCPFiles()
+        const localFiles = getSCPFiles()
         if(localFiles.length > 0){
             const promises = []
             process.self.nodes.forEach(node => promises.push(syncNode(node, localFiles)))
