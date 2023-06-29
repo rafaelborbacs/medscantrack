@@ -32,7 +32,6 @@ const mirrorSELF = (req) => {
 }
 
 const mirrorPUT = (req, body) => {
-    console.log(`Mirror PUT`)
     request({
         url: `${process.self.httpmirror}/put`,
         json: true,
