@@ -18,6 +18,8 @@ const getSCPFiles = (checkUse) => new Promise(resolve => {
                 })
             }
         })
+        if(calls.size === 0)
+            resolve(filtered)
     })
 })
 
