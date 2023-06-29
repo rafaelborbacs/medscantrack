@@ -112,7 +112,8 @@ const syncNode = async (node, localFiles) => {
     console.log(`sync node ${node.host}:${node.apiport}`)
     const remoteFiles = await checkSCP(node)
     const remoteOnGoingFiles = await checkOnGoingSCP(node)
-    remoteOnGoingFiles.forEach(file => !remoteFiles.includes(file) && remoteFiles.push(file))
+    if(remoteOnGoingFiles && remoteOnGoingFiles.length)
+        remoteOnGoingFiles.forEach(file => !remoteFiles.includes(file) && remoteFiles.push(file))
     if(remoteFiles && remoteFiles.length >= 0){
         const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
         if(missingFiles.length > 0){
