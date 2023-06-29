@@ -39,7 +39,7 @@ const getMetadicom = async (file) => new Promise((resolve, reject) => {
 })
 
 const inspect = async () => {
-    const files = getSCPFiles(true)
+    const files = await getSCPFiles(true)
     if(files.length > 0){
         const dbFiles = await db.find('file', {name: {$in: files}}, {name: 1, _id: 0})
         const nonDbFiles = files.filter(file => dbFiles.find(dbFile => dbFile.name === file) === undefined)
