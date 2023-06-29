@@ -27,8 +27,7 @@ const mirrorSELF = (req) => {
     }, (error, response, body) => {
         if(error)
             console.log('httpmirror error on SELF:', error)
-        else if(body)
-            mirrorPUT(req, {body, status: response.statusCode})
+        mirrorPUT(req, {body, status: response.statusCode})
     })
 }
 
