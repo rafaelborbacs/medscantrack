@@ -6,6 +6,7 @@ const { wakeUpInspect } = require('./inspect')
 
 let timeoutUpdate = null
 const wake = () => {
+    process.self.state = 'idle'
     wakeUpSync()
     wakeUpInspect()
     timeoutUpdate = null
