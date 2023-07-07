@@ -63,6 +63,7 @@ const onNotify = async (req, res) => {
     res.json({msg})
     files.forEach(file => !onGoingSCPFiles.includes(file) && onGoingSCPFiles.push(file))
     try {
+        process.self.state = 'downloading'
         const { aetitle, scpfolder, name } = process.self
         const uuid = Math.random().toString(36).substring(2, 9)
         const response = await axios.post(`${url}/mirrorfiles`, { aetitle, name, uuid, files }, {
@@ -80,22 +81,27 @@ const onNotify = async (req, res) => {
             const msg = `Done receiving mirror file: ${zipPath}`
             console.log(msg)
             try { writer.end() } catch (error) {}
+            process.self.state = 'unziping'
             await unzipFile(zipPath, aetitle, zipFolder)
+            process.self.state = 'storing'
             await storeSCUSelf(zipFolder)
             exec(`rm -fr ${zipFolder}`, () => {
                 console.log('Done processing mirror file')
                 wakeUpInspect()
             })
+            process.self.state = 'idle'
         })
         writer.on('error', error => {
             onGoingSCPFiles = onGoingSCPFiles.filter(file => !files.includes(file))
             console.error(`Runtime error on receiving mirror file: ${error}`)
             try { writer.end() } catch (error) {}
             exec(`rm -fr ${zipFolder}`, () => {})
+            process.self.state = 'idle'
         })
     } catch (error) {
         onGoingSCPFiles = onGoingSCPFiles.filter(file => !files.includes(file))
         console.error(`Error on receiving mirror file: ${error}`)
+        process.self.state = 'idle'
     }
 }
 

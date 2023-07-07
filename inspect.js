@@ -45,6 +45,7 @@ const inspect = async () => {
         const nonDbFiles = files.filter(file => dbFiles.find(dbFile => dbFile.name === file) === undefined)
         if(nonDbFiles.length > 0){
             console.log(`Metadata [${nonDbFiles.length} new files]`)
+            process.self.state = 'inspecting'
             for(const file of nonDbFiles){
                 const metadicom = await getMetadicom(file)
                 if(metadicom){
@@ -57,6 +58,7 @@ const inspect = async () => {
                     exec(`rm -f ${process.self.scpfolder}/${file}`, () => {})
                 }
             }
+            process.self.state = 'idle'
             return true
         }
     }

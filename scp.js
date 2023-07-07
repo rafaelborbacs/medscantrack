@@ -11,6 +11,7 @@ const wake = () => {
     timeoutUpdate = null
 }
 const onSCPAction = () => {
+    process.self.state = 'receiving'
     if(timeoutUpdate)
         clearTimeout(timeoutUpdate)
     timeoutUpdate = setTimeout(wake, 6000)

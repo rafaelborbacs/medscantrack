@@ -48,6 +48,7 @@ const startAPI = () => {
         api.get('/config', (req, res) => filter(req, res, getConfig))
         api.put('/config', (req, res) => filter(req, res, reconfig))
         api.post('/notify', (req, res) => filter(req, res, onNotify))
+        api.get('/state', (req, res) => filter(req, res, () => process.self.state))
         api.listen(process.self.apiport, () => console.log(`API is running on port ${process.self.apiport}`))
     })
 }

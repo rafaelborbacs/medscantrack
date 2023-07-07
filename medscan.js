@@ -20,7 +20,7 @@ const medscan = async () => {
     startInspect()
     startHTTPMirror()
     exec('curl ifconfig.me', (err, stdout, stderr) => {
-        if(stdout) console.error(`My IP: ${stdout}`)
+        if(stdout) console.log(`My IP: ${stdout}`)
     })
 }
 

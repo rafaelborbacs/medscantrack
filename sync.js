@@ -117,11 +117,16 @@ const syncNode = async (node, localFiles) => {
     if(remoteFiles && remoteFiles.length >= 0){
         const missingFiles = localFiles.filter(file => !remoteFiles.includes(file))
         if(missingFiles.length > 0){
+            process.self.state = 'syncing'
             for(const file of missingFiles)
                 await copyFile(node, file)
+            process.self.state = 'sending'
             await storeSCUNode(node, missingFiles)
+            process.self.state = 'notifying'
             await notifyNode(node, missingFiles)
+            process.self.state = 'clearing'
             await clearDirNode(node)
+            process.self.state = 'idle'
             return true
         }
     }
