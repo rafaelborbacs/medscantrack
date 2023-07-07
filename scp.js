@@ -39,6 +39,7 @@ const startSCP = (req, res) => {
         console.log(msgo)
         if(res) res.json({msg, msgo})
         process.self.scp = true
+        process.self.state = 'idle'
     }, 4000)
 }
 
@@ -48,6 +49,7 @@ const stopSCP = (req, res) => {
         console.log(msg)
         scp = null
         process.self.scp = false
+        process.self.state = 'stopped'
         if(res) res.json({msg})
     })
 }
