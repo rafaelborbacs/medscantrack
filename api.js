@@ -18,6 +18,7 @@ const scpfiles = async (req, res) => res.json(await getSCPFiles())
 const scpfilesCount = async (req, res) => res.json((await getSCPFiles()).length)
 const ongoingscpfiles = (req, res) => res.json(getOnGoingSCPFiles())
 const ongoingscpfilesCount = (req, res) => res.json(getOnGoingSCPFiles().length)
+const getState = (req, res) => res.json(process.self.state)
 
 const startAPI = () => {
     killPort(process.self.apiport)
@@ -48,7 +49,7 @@ const startAPI = () => {
         api.get('/config', (req, res) => filter(req, res, getConfig))
         api.put('/config', (req, res) => filter(req, res, reconfig))
         api.post('/notify', (req, res) => filter(req, res, onNotify))
-        api.get('/state', (req, res) => filter(req, res, () => process.self.state))
+        api.get('/state', (req, res) => filter(req, res, getState))
         api.listen(process.self.apiport, () => console.log(`API is running on port ${process.self.apiport}`))
     })
 }
