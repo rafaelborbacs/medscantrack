@@ -16,7 +16,7 @@ const onSCPAction = () => {
     timeoutUpdate = setTimeout(wake, 6000)
 }
 
-let scp = null
+let scp = null, scpo = null
 const storescp = path.join('.', 'dcm4chee', 'bin', 'storescp')
 const startSCP = (req, res) => {
     stopSCP()
@@ -28,14 +28,21 @@ const startSCP = (req, res) => {
         scp.on('error', code => console.error(`SCP error: ${code}`))
         const msg = `SCP started at ${process.self.aetitle}:${process.self.scpport}`
         console.log(msg)
-        if(res) res.json({msg})
+        const argso = `--accept-unknown -b ${process.self.scpporto} --directory ${process.self.scpfolder}`
+        scpo = spawn(storescp, argso.split(' '), {shell:true})
+        scpo.stdout.on('data', onSCPAction)
+        scpo.stderr.on('data', onSCPAction)
+        scpo.on('error', code => console.error(`SCP open error: ${code}`))
+        const msgo = `SCP open started at ${process.self.scpporto}`
+        console.log(msgo)
+        if(res) res.json({msg, msgo})
         process.self.scp = true
     }, 4000)
 }
 
 const stopSCP = (req, res) => {
-    exec(`kill -9 $(lsof -t -i:${process.self.scpport})`, () => {
-        const msg = `SCP stopped`
+    exec(`kill -9 $(lsof -t -i:${process.self.scpport}) & kill -9 $(lsof -t -i:${process.self.scpporto})`, () => {
+        const msg = `SCPs stopped`
         console.log(msg)
         scp = null
         process.self.scp = false

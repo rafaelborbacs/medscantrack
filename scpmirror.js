@@ -23,9 +23,9 @@ const unzipFile = async (zipPath, aetitle, folder) => new Promise((resolve, reje
 
 const storescu = path.join('.', 'dcm4chee', 'bin', 'storescu')
 const storeSCUSelf = async (folder) => new Promise((resolve, reject) => {
-    const destination = `${process.self.aetitle}@127.0.0.1:${process.self.scpport}`
+    const destination = `127.0.0.1:${process.self.scpporto}`
     console.log(`SELF SCU ${folder} --> ${destination}`)
-    const scu = spawn(storescu, ['--tls-aes','-c', destination, folder], {shell:true})
+    const scu = spawn(storescu, ['-c', destination, folder], {shell:true})
     scu.stdout.on('data', () => {})
     scu.stderr.on('data', () => {})
     scu.on('close', () => {
